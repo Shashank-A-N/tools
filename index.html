@@ -1,0 +1,1207 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ShadowTools — The Ultimate Privacy-First Toolkit</title>
+    <meta name="description"
+        content="ShadowTools: 150+ free browser-based tools for PDF, Image, Video, Audio, and Text. All processing happens locally. Your data never leaves your device.">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Orbitron:wght@400;500;600;700;800;900&family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+    <!-- Shared Theme System -->
+    <link rel="stylesheet" href="shared/theme.css">
+    <script src="shared/theme.js"></script>
+
+    <!-- Auth System -->
+    <link rel="stylesheet" href="shared/auth.css">
+    <script src="shared/auth.js" defer></script>
+
+    <style>
+        /* ===== CSS VARIABLES ===== */
+        :root {
+            --bg-main: #030712;
+            --bg-card: rgba(15, 23, 42, 0.6);
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --accent: #8b5cf6;
+            --accent2: #06b6d4;
+            --accent3: #ec4899;
+            --border: rgba(255, 255, 255, 0.06);
+            --glow: rgba(139, 92, 246, 0.15);
+        }
+
+        /* ===== RESET & BASE ===== */
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        html { scroll-behavior: smooth; overflow-x: hidden; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-main);
+            color: var(--text-primary);
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+        a { text-decoration: none; color: inherit; }
+        img { max-width: 100%; display: block; }
+
+        /* ===== 3D BACKGROUND ===== */
+        #bg-canvas {
+            position: fixed; top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: 0; pointer-events: none;
+        }
+        .bg-gradient-overlay {
+            position: fixed; top: 0; left: 0;
+            width: 100%; height: 100%; z-index: 0; pointer-events: none;
+            background:
+                radial-gradient(ellipse at 20% 50%, rgba(139,92,246,0.08) 0%, transparent 60%),
+                radial-gradient(ellipse at 80% 20%, rgba(6,182,212,0.06) 0%, transparent 50%),
+                radial-gradient(ellipse at 50% 100%, rgba(236,72,153,0.05) 0%, transparent 40%);
+        }
+
+        /* ===== UTILITY CLASSES ===== */
+        .container { max-width: 1280px; margin: 0 auto; padding: 0 1.5rem; }
+        .section-pad { padding: 6rem 0; }
+        .text-gradient {
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            -webkit-background-clip: text; background-clip: text; color: transparent;
+        }
+        .text-gradient-pink {
+            background: linear-gradient(135deg, var(--accent3), var(--accent));
+            -webkit-background-clip: text; background-clip: text; color: transparent;
+        }
+        .font-orbitron { font-family: 'Orbitron', sans-serif; }
+        .font-rajdhani { font-family: 'Rajdhani', sans-serif; }
+        .font-mono { font-family: 'Share Tech Mono', monospace; }
+
+        /* ===== GLASSMORPHISM ===== */
+        .glass {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-radius: 1.25rem;
+        }
+
+        /* ===== SCROLL REVEAL ===== */
+        .reveal {
+            opacity: 0; transform: translateY(40px);
+            transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .reveal.visible { opacity: 1; transform: translateY(0); }
+
+        /* ===== NAVIGATION ===== */
+        .nav {
+            position: fixed; top: 0; left: 0; width: 100%; z-index: 1000;
+            background: rgba(3, 7, 18, 0.75);
+            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+            transition: all 0.3s;
+        }
+        .nav-inner {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0.9rem 1.5rem;
+            max-width: 1400px; margin: 0 auto;
+        }
+        .nav-brand { display: flex; align-items: center; gap: 0.75rem; }
+        .nav-logo {
+            width: 42px; height: 42px; border-radius: 12px;
+            background: linear-gradient(135deg, #8b5cf6, #6366f1);
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 0 20px rgba(139,92,246,0.4);
+            position: relative; overflow: hidden;
+        }
+        .nav-logo::after {
+            content: ''; position: absolute; inset: 0;
+            background: linear-gradient(135deg, transparent, rgba(255,255,255,0.15));
+        }
+        .nav-logo i { color: #fff; font-size: 1.1rem; position: relative; z-index: 1; }
+        .nav-title { font-family: 'Orbitron', sans-serif; font-weight: 800; font-size: 1.2rem; letter-spacing: 0.1em; color: #fff; }
+        .nav-title span { color: var(--accent); }
+        .nav-subtitle { font-family: 'Share Tech Mono', monospace; font-size: 0.55rem; color: #64748b; letter-spacing: 0.25em; }
+
+        .nav-links { display: flex; gap: 2rem; align-items: center; }
+        .nav-link {
+            font-family: 'Rajdhani', sans-serif; font-weight: 600; font-size: 0.85rem;
+            color: #94a3b8; letter-spacing: 0.12em; text-transform: uppercase;
+            transition: color 0.25s; position: relative;
+        }
+        .nav-link:hover { color: #fff; }
+        .nav-link::after {
+            content: ''; position: absolute; bottom: -4px; left: 0;
+            width: 0; height: 2px; background: var(--accent);
+            transition: width 0.3s;
+        }
+        .nav-link:hover::after { width: 100%; }
+
+        .nav-actions { display: flex; align-items: center; gap: 0.75rem; }
+        .nav-auth-btn {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 8px 18px;
+            background: linear-gradient(135deg, var(--accent), #6366f1);
+            border: none; border-radius: 10px;
+            color: #fff; font-family: 'Orbitron', sans-serif; font-weight: 600;
+            font-size: 0.7rem; letter-spacing: 0.1em; cursor: pointer;
+            transition: all 0.3s; position: relative; overflow: hidden;
+        }
+        .nav-auth-btn::before {
+            content: ''; position: absolute; inset: 0;
+            background: linear-gradient(135deg, transparent, rgba(255,255,255,0.1));
+            opacity: 0; transition: opacity 0.3s;
+        }
+        .nav-auth-btn:hover {
+            box-shadow: 0 0 30px rgba(139,92,246,0.5);
+            transform: translateY(-1px);
+        }
+        .nav-auth-btn:hover::before { opacity: 1; }
+
+        .mobile-toggle {
+            display: none; cursor: pointer; background: none; border: none; padding: 6px;
+        }
+        .mobile-toggle span {
+            display: block; width: 22px; height: 2px; background: #e2e8f0;
+            margin: 5px 0; border-radius: 2px; transition: all 0.3s;
+        }
+
+        /* ===== HERO ===== */
+        .hero {
+            position: relative; z-index: 1;
+            min-height: 100vh; display: flex; align-items: center;
+            padding-top: 5rem;
+        }
+        .hero-inner {
+            display: flex; flex-direction: column; align-items: center;
+            text-align: center; gap: 2rem; padding: 3rem 0;
+        }
+        .hero-badge {
+            display: inline-flex; align-items: center; gap: 10px;
+            padding: 6px 16px; border-radius: 100px;
+            background: rgba(139,92,246,0.06);
+            border: 1px solid rgba(139,92,246,0.2);
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.7rem; color: var(--accent); letter-spacing: 0.15em;
+        }
+        .hero-badge .pulse {
+            width: 8px; height: 8px; border-radius: 50%;
+            background: var(--accent); position: relative;
+        }
+        .hero-badge .pulse::before {
+            content: ''; position: absolute; inset: -3px;
+            border-radius: 50%; background: var(--accent);
+            animation: ping 1.5s cubic-bezier(0, 0, 0.2, 1) infinite; opacity: 0.6;
+        }
+        @keyframes ping { 75%, 100% { transform: scale(2.5); opacity: 0; } }
+
+        .hero-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: clamp(2.5rem, 7vw, 5.5rem);
+            font-weight: 900; line-height: 1.1;
+            letter-spacing: -0.02em;
+        }
+        .hero-subtitle {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: clamp(1rem, 2.5vw, 1.35rem);
+            color: var(--text-secondary); max-width: 600px;
+            line-height: 1.7; font-weight: 500;
+        }
+        .hero-subtitle strong { color: #fff; font-weight: 700; }
+
+        .hero-ctas {
+            display: flex; flex-wrap: wrap; gap: 1rem;
+            justify-content: center; margin-top: 0.5rem;
+        }
+        .btn-primary {
+            display: inline-flex; align-items: center; gap: 8px;
+            padding: 14px 32px;
+            background: linear-gradient(135deg, #8b5cf6, #6366f1);
+            border: none; border-radius: 14px;
+            color: #fff; font-family: 'Orbitron', sans-serif;
+            font-weight: 700; font-size: 0.8rem; letter-spacing: 0.12em;
+            cursor: pointer; transition: all 0.3s; position: relative; overflow: hidden;
+        }
+        .btn-primary:hover {
+            box-shadow: 0 0 40px rgba(139,92,246,0.5);
+            transform: translateY(-2px);
+        }
+        .btn-outline {
+            display: inline-flex; align-items: center; gap: 8px;
+            padding: 14px 32px;
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 14px;
+            color: #fff; font-family: 'Orbitron', sans-serif;
+            font-weight: 700; font-size: 0.8rem; letter-spacing: 0.12em;
+            cursor: pointer; transition: all 0.3s;
+        }
+        .btn-outline:hover {
+            background: rgba(255,255,255,0.05);
+            border-color: rgba(255,255,255,0.3);
+        }
+
+        /* Hero Stats */
+        .hero-stats {
+            display: grid; grid-template-columns: repeat(4, 1fr);
+            gap: 1rem; width: 100%; max-width: 700px; margin-top: 2rem;
+        }
+        .stat-card {
+            padding: 1rem; border-radius: 14px;
+            background: rgba(255,255,255,0.02);
+            border: 1px solid var(--border);
+            backdrop-filter: blur(8px);
+            text-align: center;
+        }
+        .stat-num { font-family: 'Share Tech Mono', monospace; font-size: 1.6rem; font-weight: 700; }
+        .stat-label { font-family: 'Orbitron', sans-serif; font-size: 0.55rem; color: #64748b; letter-spacing: 0.2em; margin-top: 4px; }
+
+        /* ===== TOOL SUITES SECTION ===== */
+        .suites-header {
+            text-align: center; margin-bottom: 4rem;
+        }
+        .suites-header h2 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: clamp(1.8rem, 4vw, 2.8rem);
+            font-weight: 800; margin-bottom: 0.75rem;
+        }
+        .suites-header p {
+            font-family: 'Rajdhani', sans-serif; font-size: 1.1rem;
+            color: var(--text-secondary); max-width: 550px; margin: 0 auto;
+        }
+
+        .suites-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .suite-card {
+            position: relative;
+            padding: 2rem;
+            border-radius: 1.25rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            backdrop-filter: blur(16px);
+            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+            display: flex; flex-direction: column; gap: 1rem;
+        }
+        .suite-card::before {
+            content: ''; position: absolute; inset: 0;
+            border-radius: 1.25rem;
+            padding: 1.5px;
+            background: linear-gradient(135deg, transparent 30%, var(--card-accent, #8b5cf6) 50%, transparent 70%);
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor; mask-composite: exclude;
+            opacity: 0; transition: opacity 0.4s;
+        }
+        .suite-card:hover::before { opacity: 0.6; }
+        .suite-card:hover {
+            transform: translateY(-6px);
+            border-color: var(--card-accent, rgba(139,92,246,0.3));
+            box-shadow: 0 20px 50px -10px rgba(0,0,0,0.6), 0 0 40px var(--card-glow, rgba(139,92,246,0.08));
+        }
+
+        .suite-icon {
+            width: 56px; height: 56px;
+            border-radius: 16px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.5rem;
+            transition: transform 0.3s;
+        }
+        .suite-card:hover .suite-icon { transform: scale(1.15) rotate(-5deg); }
+
+        .suite-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.15rem; font-weight: 700; color: #fff;
+        }
+        .suite-desc {
+            font-family: 'Rajdhani', sans-serif; font-size: 0.95rem;
+            color: #94a3b8; line-height: 1.6;
+        }
+        .suite-count {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.7rem; color: #64748b;
+            letter-spacing: 0.15em;
+            padding-top: 0.5rem;
+            border-top: 1px solid var(--border);
+        }
+        .suite-arrow {
+            position: absolute; bottom: 1.5rem; right: 1.5rem;
+            color: #475569; font-size: 1.2rem;
+            transition: all 0.3s;
+        }
+        .suite-card:hover .suite-arrow {
+            color: var(--card-accent, #8b5cf6);
+            transform: translateX(4px);
+        }
+
+        /* Card Accent Colors */
+        .suite-pdf { --card-accent: #ef4444; --card-glow: rgba(239,68,68,0.1); }
+        .suite-pdf .suite-icon { background: rgba(239,68,68,0.12); color: #ef4444; border: 1px solid rgba(239,68,68,0.2); }
+        .suite-image { --card-accent: #3b82f6; --card-glow: rgba(59,130,246,0.1); }
+        .suite-image .suite-icon { background: rgba(59,130,246,0.12); color: #3b82f6; border: 1px solid rgba(59,130,246,0.2); }
+        .suite-video { --card-accent: #8b5cf6; --card-glow: rgba(139,92,246,0.1); }
+        .suite-video .suite-icon { background: rgba(139,92,246,0.12); color: #8b5cf6; border: 1px solid rgba(139,92,246,0.2); }
+        .suite-audio { --card-accent: #f59e0b; --card-glow: rgba(245,158,11,0.1); }
+        .suite-audio .suite-icon { background: rgba(245,158,11,0.12); color: #f59e0b; border: 1px solid rgba(245,158,11,0.2); }
+        .suite-text { --card-accent: #10b981; --card-glow: rgba(16,185,129,0.1); }
+        .suite-text .suite-icon { background: rgba(16,185,129,0.12); color: #10b981; border: 1px solid rgba(16,185,129,0.2); }
+        .suite-dev { --card-accent: #6366f1; --card-glow: rgba(99,102,241,0.1); }
+        .suite-dev .suite-icon { background: rgba(99,102,241,0.12); color: #6366f1; border: 1px solid rgba(99,102,241,0.2); }
+
+        /* ===== FEATURES SECTION ===== */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+        }
+        .feature-card {
+            padding: 2rem;
+            border-radius: 1.25rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            backdrop-filter: blur(16px);
+            transition: all 0.35s;
+        }
+        .feature-card:hover {
+            border-color: rgba(139,92,246,0.25);
+            box-shadow: 0 15px 40px -10px rgba(0,0,0,0.5);
+            transform: translateY(-4px);
+        }
+        .feature-icon {
+            width: 48px; height: 48px;
+            border-radius: 14px;
+            background: linear-gradient(135deg, rgba(139,92,246,0.12), rgba(6,182,212,0.08));
+            border: 1px solid rgba(139,92,246,0.2);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.2rem; color: var(--accent);
+            margin-bottom: 1.25rem;
+            transition: transform 0.3s;
+        }
+        .feature-card:hover .feature-icon { transform: scale(1.1); }
+        .feature-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1rem; font-weight: 700; color: #fff; margin-bottom: 0.5rem;
+        }
+        .feature-desc {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 0.95rem; color: #94a3b8; line-height: 1.6;
+        }
+
+        /* ===== ABOUT / COMPANY SECTION ===== */
+        .about-grid {
+            display: grid; grid-template-columns: 1fr 1fr;
+            gap: 4rem; align-items: center;
+        }
+        .about-content h2 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: clamp(1.6rem, 3.5vw, 2.4rem);
+            font-weight: 800; margin-bottom: 1.5rem;
+        }
+        .about-content p {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1.05rem; color: var(--text-secondary);
+            line-height: 1.8; margin-bottom: 1rem;
+        }
+        .about-content p strong { color: #fff; }
+        .about-visual {
+            position: relative;
+        }
+        .about-terminal {
+            border-radius: 1rem; overflow: hidden;
+            border: 1px solid var(--border);
+            background: rgba(0,0,0,0.5);
+        }
+        .terminal-bar {
+            display: flex; align-items: center; gap: 6px;
+            padding: 10px 14px;
+            background: rgba(30,41,59,0.8);
+            border-bottom: 1px solid var(--border);
+        }
+        .terminal-dot { width: 10px; height: 10px; border-radius: 50%; }
+        .terminal-title { font-family: 'Share Tech Mono', monospace; font-size: 0.65rem; color: #64748b; margin-left: 8px; }
+        .terminal-body {
+            padding: 1.25rem;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.8rem;
+            line-height: 1.8;
+            min-height: 200px;
+        }
+        .terminal-body .line-green { color: #4ade80; }
+        .terminal-body .line-purple { color: #a78bfa; }
+        .terminal-body .line-cyan { color: #22d3ee; }
+        .terminal-body .line-gray { color: #64748b; }
+        .terminal-body .line-white { color: #e2e8f0; }
+        .cursor-blink { animation: blink 1s step-end infinite; }
+        @keyframes blink { 50% { opacity: 0; } }
+
+        /* ===== FOOTER ===== */
+        .footer {
+            position: relative; z-index: 1;
+            border-top: 1px solid var(--border);
+            background: rgba(3,7,18,0.8);
+            backdrop-filter: blur(20px);
+            padding: 3rem 0 2rem;
+        }
+        .footer-inner {
+            display: flex; justify-content: space-between; align-items: center;
+            flex-wrap: wrap; gap: 1.5rem;
+        }
+        .footer-brand { display: flex; align-items: center; gap: 0.75rem; }
+        .footer-links { display: flex; gap: 1.5rem; flex-wrap: wrap; }
+        .footer-link {
+            font-family: 'Rajdhani', sans-serif; font-weight: 600;
+            font-size: 0.85rem; color: #64748b;
+            transition: color 0.25s;
+        }
+        .footer-link:hover { color: var(--accent); }
+        .footer-copy {
+            width: 100%; text-align: center;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.65rem; color: #334155;
+            letter-spacing: 0.2em; margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border);
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 1024px) {
+            .features-grid { grid-template-columns: repeat(2, 1fr); }
+            .about-grid { grid-template-columns: 1fr; gap: 2rem; }
+        }
+        @media (max-width: 768px) {
+            .nav-links { display: none; }
+            .mobile-toggle { display: block; }
+            .hero-stats { grid-template-columns: repeat(2, 1fr); }
+            .features-grid { grid-template-columns: 1fr; }
+            .section-pad { padding: 4rem 0; }
+            .hero { min-height: auto; padding-top: 7rem; padding-bottom: 3rem; }
+            .suites-grid { grid-template-columns: 1fr; }
+        }
+
+        /* Mobile Menu */
+        .mobile-menu {
+            display: none;
+            position: fixed; top: 0; left: 0;
+            width: 100%; height: 100vh;
+            background: rgba(3,7,18,0.97);
+            backdrop-filter: blur(20px);
+            z-index: 999;
+            flex-direction: column;
+            align-items: center; justify-content: center;
+            gap: 2rem;
+        }
+        .mobile-menu.active { display: flex; }
+        .mobile-menu .nav-link { font-size: 1.2rem; }
+        .mobile-menu-close {
+            position: absolute; top: 1.5rem; right: 1.5rem;
+            background: none; border: none; color: #fff;
+            font-size: 1.5rem; cursor: pointer;
+        }
+
+        /* ===== FLOATING PARTICLES (CSS fallback) ===== */
+        .floating-shape {
+            position: absolute; border-radius: 50%;
+            filter: blur(60px); opacity: 0.3;
+            pointer-events: none; z-index: 0;
+        }
+
+        /* ===== THEME TOGGLE ===== */
+        .hub-theme-toggle {
+            width: 38px; height: 38px;
+            border-radius: 10px;
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: #94a3b8;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; font-size: 1rem;
+            transition: all 0.3s;
+        }
+        .hub-theme-toggle:hover {
+            background: rgba(139,92,246,0.15);
+            border-color: rgba(139,92,246,0.3);
+            color: #fff;
+            transform: rotate(15deg);
+        }
+
+        /* ===== LIGHT MODE OVERRIDES ===== */
+        .light-mode {
+            --bg-main: #f8fafc;
+            --bg-card: rgba(255, 255, 255, 0.75);
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
+            --accent: #7c3aed;
+            --accent2: #0891b2;
+            --accent3: #db2777;
+            --border: rgba(0, 0, 0, 0.08);
+            --glow: rgba(124, 58, 237, 0.08);
+        }
+        .light-mode body { background: var(--bg-main); color: var(--text-primary); }
+
+        /* Nav */
+        .light-mode .nav {
+            background: rgba(248,250,252,0.85);
+        }
+        .light-mode .nav-title { color: #0f172a; }
+        .light-mode .nav-link { color: #475569; }
+        .light-mode .nav-link:hover { color: #0f172a; }
+        .light-mode .nav-subtitle { color: #64748b; }
+
+        /* Hub Theme Toggle */
+        .light-mode .hub-theme-toggle {
+            background: rgba(0,0,0,0.04);
+            border-color: rgba(0,0,0,0.1);
+            color: #f59e0b;
+        }
+        .light-mode .hub-theme-toggle:hover {
+            background: rgba(245,158,11,0.12);
+            border-color: rgba(245,158,11,0.3);
+            color: #d97706;
+        }
+
+        /* Hero */
+        .light-mode .hero h1 { color: #0f172a; }
+        .light-mode .hero-badge {
+            background: rgba(124, 58, 237, 0.1);
+            border-color: rgba(124, 58, 237, 0.2);
+            color: #5b21b6;
+        }
+        .light-mode .hero-subtitle { color: #475569; }
+        .light-mode .hero-subtitle strong { color: #0f172a; }
+        
+        .light-mode .hero-cta-primary {
+            background: linear-gradient(135deg, #7c3aed, #4f46e5);
+            color: #fff;
+        }
+        .light-mode .btn-outline {
+            color: #334155;
+            border-color: rgba(0,0,0,0.15);
+        }
+        .light-mode .btn-outline:hover {
+            background: rgba(0,0,0,0.05);
+            border-color: rgba(0,0,0,0.3);
+        }
+        
+        .light-mode .stat-num { color: #0f172a; }
+        .light-mode .stat-label { color: #475569; }
+
+        /* Suites Section */
+        .light-mode .suites-header p { color: #334155; }
+        
+        /* Cards */
+        .light-mode .glass {
+            background: rgba(255,255,255,0.8);
+            border-color: rgba(0,0,0,0.06);
+        }
+        .light-mode .suite-card {
+            background: rgba(255,255,255,0.85);
+            border-color: rgba(0,0,0,0.06);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.04);
+        }
+        .light-mode .suite-card:hover {
+            box-shadow: 0 20px 50px -10px rgba(0,0,0,0.15);
+        }
+        .light-mode .suite-title { color: #0f172a; }
+        .light-mode .suite-desc { color: #475569; }
+        .light-mode .suite-count { color: #475569; border-top-color: rgba(0,0,0,0.06); }
+        .light-mode .suite-arrow { color: #64748b; }
+
+        /* Features */
+        .light-mode .feature-card {
+            background: rgba(255,255,255,0.85);
+            border-color: rgba(0,0,0,0.06);
+        }
+        .light-mode .feature-card:hover {
+            border-color: rgba(124,58,237,0.2);
+            box-shadow: 0 15px 40px -10px rgba(0,0,0,0.1);
+        }
+        .light-mode .feature-title { color: #0f172a; }
+        .light-mode .feature-desc { color: #475569; }
+
+        /* Section headings */
+        .light-mode .section-title { color: #0f172a; }
+
+        /* About */
+        .light-mode .about-content h2 { color: #0f172a; }
+        .light-mode .about-content p { color: #475569; }
+        .light-mode .about-content p strong { color: #0f172a; }
+        .light-mode .about-terminal {
+            background: rgba(15,23,42,0.95);
+        }
+
+        /* Footer */
+        .light-mode .footer {
+            background: rgba(241,245,249,0.9);
+            border-top-color: rgba(0,0,0,0.06);
+        }
+        .light-mode .footer-link { color: #64748b; }
+        .light-mode .footer-link:hover { color: #7c3aed; }
+        .light-mode .footer-copy { color: #64748b; border-top-color: rgba(0,0,0,0.06); }
+
+        /* 3D canvas dimming in light mode */
+        .light-mode #bg-canvas { opacity: 0.12; }
+        .light-mode .bg-gradient-overlay {
+            background:
+                radial-gradient(ellipse at 20% 50%, rgba(124,58,237,0.06) 0%, transparent 60%),
+                radial-gradient(ellipse at 80% 20%, rgba(8,145,178,0.05) 0%, transparent 50%),
+                radial-gradient(ellipse at 50% 100%, rgba(219,39,119,0.04) 0%, transparent 40%);
+        }
+
+        /* Mobile menu */
+        .light-mode .mobile-menu {
+            background: rgba(248,250,252,0.97);
+        }
+        .light-mode .mobile-menu .nav-link { color: #334155; }
+        .light-mode .mobile-menu-close { color: #334155; }
+
+        /* Auth modal */
+        .light-mode .auth-modal-overlay {
+            background: rgba(241,245,249,0.85);
+        }
+    </style>
+</head>
+
+<body>
+    <!-- 3D Particle Background -->
+    <canvas id="bg-canvas"></canvas>
+    <div class="bg-gradient-overlay"></div>
+
+    <!-- ===== NAVIGATION ===== -->
+    <nav class="nav" id="navbar">
+        <div class="nav-inner">
+            <a href="#" class="nav-brand">
+                <div class="nav-logo">
+                    <i class="fas fa-ghost"></i>
+                </div>
+                <div>
+                    <div class="nav-title">SHADOW<span>TOOLS</span></div>
+                    <div class="nav-subtitle">PRIVACY ARCHITECTS</div>
+                </div>
+            </a>
+
+            <div class="nav-links">
+                <a href="#tools" class="nav-link">TOOL SUITES</a>
+                <a href="#features" class="nav-link">FEATURES</a>
+                <a href="#about" class="nav-link">ABOUT</a>
+            </div>
+
+            <div class="nav-actions">
+                <div id="shadow-auth-ui"></div>
+                <button class="hub-theme-toggle" onclick="toggleTheme()" title="Toggle Theme">
+                    <i id="theme-icon" class="fas fa-moon"></i>
+                </button>
+                <button class="nav-auth-btn" id="nav-login-btn" onclick="openAuthModal('login')">
+                    <i class="fas fa-fingerprint"></i> ACCESS
+                </button>
+                <button class="mobile-toggle" id="mobile-toggle" onclick="toggleMobileMenu()">
+                    <span></span><span></span><span></span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Mobile Menu -->
+    <div class="mobile-menu" id="mobile-menu">
+        <button class="mobile-menu-close" onclick="toggleMobileMenu()">&times;</button>
+        <a href="#tools" class="nav-link" onclick="toggleMobileMenu()">TOOL SUITES</a>
+        <a href="#features" class="nav-link" onclick="toggleMobileMenu()">FEATURES</a>
+        <a href="#about" class="nav-link" onclick="toggleMobileMenu()">ABOUT</a>
+        <button class="nav-auth-btn" onclick="toggleMobileMenu(); openAuthModal('login')">
+            <i class="fas fa-fingerprint"></i> ACCESS PANEL
+        </button>
+    </div>
+
+    <!-- ===== AUTH MODAL ===== -->
+    <div class="auth-modal-overlay" id="auth-overlay">
+        <div class="auth-modal">
+            <button class="auth-close-btn" onclick="closeAuthModal()">
+                <i class="fas fa-times"></i>
+            </button>
+
+            <!-- Login Form -->
+            <div id="login-form">
+                <h2>SYSTEM ACCESS</h2>
+                <div class="auth-subtitle">>> AUTHENTICATE TO PROCEED</div>
+                <div class="auth-error" id="login-error"></div>
+                <div class="auth-input-group">
+                    <label>Email</label>
+                    <input type="email" class="auth-input" id="login-email" placeholder="agent@shadow.tools">
+                </div>
+                <div class="auth-input-group">
+                    <label>Password</label>
+                    <input type="password" class="auth-input" id="login-password" placeholder="••••••••">
+                </div>
+                <button class="auth-submit-btn" onclick="handleLogin()">INITIATE LOGIN</button>
+                <div class="auth-toggle">
+                    No account? <a onclick="switchAuthForm('register')">Create one</a>
+                </div>
+            </div>
+
+            <!-- Register Form -->
+            <div id="register-form" style="display:none;">
+                <h2>NEW OPERATIVE</h2>
+                <div class="auth-subtitle">>> REGISTER A NEW IDENTITY</div>
+                <div class="auth-error" id="register-error"></div>
+                <div class="auth-input-group">
+                    <label>Full Name</label>
+                    <input type="text" class="auth-input" id="reg-name" placeholder="Ghost Phantom">
+                </div>
+                <div class="auth-input-group">
+                    <label>Email</label>
+                    <input type="email" class="auth-input" id="reg-email" placeholder="agent@shadow.tools">
+                </div>
+                <div class="auth-input-group">
+                    <label>Password</label>
+                    <input type="password" class="auth-input" id="reg-password" placeholder="Min 6 characters">
+                </div>
+                <button class="auth-submit-btn" onclick="handleRegister()">CREATE ACCOUNT</button>
+                <div class="auth-toggle">
+                    Already registered? <a onclick="switchAuthForm('login')">Login here</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== HERO SECTION ===== -->
+    <section class="hero" id="hero">
+        <div class="container">
+            <div class="hero-inner">
+                <div class="reveal hero-badge">
+                    <div class="pulse"></div>
+                    ALL SYSTEMS OPERATIONAL // ENCRYPTION: AES-256
+                </div>
+
+                <h1 class="reveal hero-title">
+                    THE ULTIMATE<br>
+                    <span class="text-gradient">SHADOW TOOLKIT</span>
+                </h1>
+
+                <p class="reveal hero-subtitle">
+                    180+ privacy-first tools for <strong>PDF, Image, Video, Audio & Text</strong> processing.
+                    Everything runs locally in your browser.
+                    <strong>Your data never leaves your device.</strong>
+                </p>
+
+                <div class="reveal hero-ctas">
+                    <a href="#tools" class="btn-primary">
+                        <i class="fas fa-rocket"></i> EXPLORE TOOLS
+                    </a>
+                    <a href="https://github.com/Shashank-A-N/Shadow-PDF" target="_blank" class="btn-outline">
+                        <i class="fab fa-github"></i> SOURCE CODE
+                    </a>
+                </div>
+
+                <div class="reveal hero-stats">
+                    <div class="stat-card">
+                        <div class="stat-num text-gradient" id="stat-tools">180+</div>
+                        <div class="stat-label">TOOLS</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-num" style="color:#4ade80;">6</div>
+                        <div class="stat-label">CATEGORIES</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-num" style="color:#22d3ee;">0ms</div>
+                        <div class="stat-label">DATA EGRESS</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-num" style="color:#a78bfa;">100%</div>
+                        <div class="stat-label">LOCAL</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== TOOL SUITES ===== -->
+    <section class="section-pad" id="tools" style="position:relative; z-index:1;">
+        <div class="container">
+            <div class="reveal suites-header">
+                <h2><span class="text-gradient">TOOL SUITES</span></h2>
+                <p>Six specialized arsenals, each loaded with powerful tools. Click any suite to dive in.</p>
+            </div>
+
+            <div class="suites-grid">
+
+                <!-- PDF Tools -->
+                <a href="pdf tools/index.html" class="suite-card suite-pdf reveal">
+                    <div class="suite-icon"><i class="fas fa-file-pdf"></i></div>
+                    <div class="suite-title">PDF Tools</div>
+                    <div class="suite-desc">
+                        Merge, split, compress, convert, edit, protect, OCR, sign, redact, and much more. The complete PDF command center.
+                    </div>
+                    <div class="suite-count">>> 40+ TOOLS AVAILABLE</div>
+                    <div class="suite-arrow"><i class="fas fa-arrow-right"></i></div>
+                </a>
+
+                <!-- Image Tools -->
+                <a href="image tools/index.html" class="suite-card suite-image reveal">
+                    <div class="suite-icon"><i class="fas fa-image"></i></div>
+                    <div class="suite-title">Image Tools</div>
+                    <div class="suite-desc">
+                        Resize, compress, convert, edit, upscale, add watermarks, remove backgrounds, generate memes, and more.
+                    </div>
+                    <div class="suite-count">>> 24+ TOOLS AVAILABLE</div>
+                    <div class="suite-arrow"><i class="fas fa-arrow-right"></i></div>
+                </a>
+
+                <!-- Video Tools -->
+                <a href="video tools/index.html" class="suite-card suite-video reveal">
+                    <div class="suite-icon"><i class="fas fa-video"></i></div>
+                    <div class="suite-title">Video Tools</div>
+                    <div class="suite-desc">
+                        Trim, crop, merge, compress, convert, add filters, extract frames, screen record, chroma key, and more.
+                    </div>
+                    <div class="suite-count">>> 40+ TOOLS AVAILABLE</div>
+                    <div class="suite-arrow"><i class="fas fa-arrow-right"></i></div>
+                </a>
+
+                <!-- Audio Tools -->
+                <a href="audio tools/index.html" class="suite-card suite-audio reveal">
+                    <div class="suite-icon"><i class="fas fa-headphones"></i></div>
+                    <div class="suite-title">Audio Tools</div>
+                    <div class="suite-desc">
+                        Trim, mix, convert, equalize, boost bass, generate tones, detect BPM, remove vocals, add effects, and more.
+                    </div>
+                    <div class="suite-count">>> 50+ TOOLS AVAILABLE</div>
+                    <div class="suite-arrow"><i class="fas fa-arrow-right"></i></div>
+                </a>
+
+                <!-- Text Tools -->
+                <a href="text tools/index.html" class="suite-card suite-text reveal">
+                    <div class="suite-icon"><i class="fas fa-font"></i></div>
+                    <div class="suite-title">Text Tools</div>
+                    <div class="suite-desc">
+                        Encode, decode, convert, diff, generate passwords, slugify, extract emails, transform case, and more.
+                    </div>
+                    <div class="suite-count">>> 28+ TOOLS AVAILABLE</div>
+                    <div class="suite-arrow"><i class="fas fa-arrow-right"></i></div>
+                </a>
+
+                <!-- Developer Tools -->
+                <a href="developer tools/index.html" class="suite-card suite-dev reveal">
+                    <div class="suite-icon"><i class="fas fa-code"></i></div>
+                    <div class="suite-title">Developer Tools</div>
+                    <div class="suite-desc">
+                        Format JSON, decode JWTs, generate hashes and UUIDs, test Regex, and more developer essentials.
+                    </div>
+                    <div class="suite-count">>> 31 TOOLS AVAILABLE</div>
+                    <div class="suite-arrow"><i class="fas fa-arrow-right"></i></div>
+                </a>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== FEATURES ===== -->
+    <section class="section-pad" id="features" style="position:relative; z-index:1;">
+        <div class="container">
+            <div class="reveal suites-header">
+                <h2>WHY <span class="text-gradient-pink">SHADOW</span>?</h2>
+                <p>Built from the ground up with privacy, speed, and power as core principles.</p>
+            </div>
+
+            <div class="features-grid">
+                <div class="feature-card reveal">
+                    <div class="feature-icon"><i class="fas fa-lock"></i></div>
+                    <div class="feature-title">Zero Trust Architecture</div>
+                    <div class="feature-desc">All processing happens client‑side using WebAssembly sandboxes. No server ever sees your files or data.</div>
+                </div>
+                <div class="feature-card reveal">
+                    <div class="feature-icon"><i class="fas fa-bolt"></i></div>
+                    <div class="feature-title">Lightning Performance</div>
+                    <div class="feature-desc">No upload, no waiting. Tools execute instantly in your browser, powered by modern Web APIs and WASM.</div>
+                </div>
+                <div class="feature-card reveal">
+                    <div class="feature-icon"><i class="fas fa-code-branch"></i></div>
+                    <div class="feature-title">Open Source</div>
+                    <div class="feature-desc">Security through obscurity is a fallacy. Every line of code is public, audited, and community‑verified.</div>
+                </div>
+                <div class="feature-card reveal">
+                    <div class="feature-icon"><i class="fas fa-brain"></i></div>
+                    <div class="feature-title">AI Powered</div>
+                    <div class="feature-desc">Leverage Gemini AI for intelligent summaries, Q&A, image enhancement, and background removal directly in the browser.</div>
+                </div>
+                <div class="feature-card reveal">
+                    <div class="feature-icon"><i class="fas fa-globe"></i></div>
+                    <div class="feature-title">Works Everywhere</div>
+                    <div class="feature-desc">Progressive Web App support. Use on desktop, tablet, or mobile. Install it, even use it offline.</div>
+                </div>
+                <div class="feature-card reveal">
+                    <div class="feature-icon"><i class="fas fa-shield-halved"></i></div>
+                    <div class="feature-title">No Tracking</div>
+                    <div class="feature-desc">No analytics, no cookies, no fingerprinting. We don't know who you are, and that's by design.</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== ABOUT / COMPANY ===== -->
+    <section class="section-pad" id="about" style="position:relative; z-index:1;">
+        <div class="container">
+            <div class="about-grid">
+                <div class="about-content reveal">
+                    <h2>ENTER THE <span class="text-gradient">SHADOW</span></h2>
+                    <p>
+                        We build the <strong>silent layer of the internet</strong>. ShadowTools is a complete suite of
+                        privacy-first browser tools, engineered for users who refuse to compromise on data ownership.
+                    </p>
+                    <p>
+                        Every tool processes your files <strong>100% locally</strong> — using cutting-edge WebAssembly,
+                        Canvas API, Web Audio API, and the File System Access API. Nothing is uploaded. Nothing is stored. Nothing leaves your machine.
+                    </p>
+                    <p>
+                        From PDFs to videos, from images to audio — ShadowTools handles it all, with a design language
+                        that's as powerful as the tech behind it.
+                    </p>
+                    <div style="margin-top:1.5rem; display:flex; gap:0.75rem; flex-wrap:wrap;">
+                        <a href="shadow.html" class="btn-outline" style="padding:10px 20px; font-size:0.7rem;">
+                            <i class="fas fa-users"></i> MEET THE TEAM
+                        </a>
+                        <a href="Manifesto.html" class="btn-outline" style="padding:10px 20px; font-size:0.7rem;">
+                            <i class="fas fa-scroll"></i> OUR MANIFESTO
+                        </a>
+                    </div>
+                </div>
+
+                <div class="about-visual reveal">
+                    <div class="about-terminal">
+                        <div class="terminal-bar">
+                            <div class="terminal-dot" style="background:#ef4444;"></div>
+                            <div class="terminal-dot" style="background:#f59e0b;"></div>
+                            <div class="terminal-dot" style="background:#22c55e;"></div>
+                            <span class="terminal-title">admin@shadowtools:~</span>
+                        </div>
+                        <div class="terminal-body" id="terminal-body">
+                            <div class="line-gray">Last login: Today at 09:41:00 on ttys001</div>
+                            <div class="line-green">$ shadowtools --init</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== FOOTER ===== -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-inner">
+                <div class="footer-brand">
+                    <div class="nav-logo" style="width:36px; height:36px; border-radius:10px;">
+                        <i class="fas fa-ghost" style="font-size:0.9rem;"></i>
+                    </div>
+                    <span class="font-orbitron" style="font-weight:800; font-size:1.1rem; letter-spacing:0.1em;">SHADOWTOOLS</span>
+                </div>
+                <div class="footer-links">
+                    <a href="shadow.html" class="footer-link">About</a>
+                    <a href="Manifesto.html" class="footer-link">Manifesto</a>
+                    <a href="legal.html" class="footer-link">Legal</a>
+                    <a href="https://github.com/Shashank-A-N" target="_blank" class="footer-link"><i class="fab fa-github"></i> GitHub</a>
+                    <a href="https://www.linkedin.com/in/shashankan" target="_blank" class="footer-link"><i class="fab fa-linkedin-in"></i> LinkedIn</a>
+                </div>
+            </div>
+            <div class="footer-copy">&copy; 2026 SHADOWTOOLS. ALL DATA PROCESSED LOCALLY. ALL RIGHTS RESERVED.</div>
+        </div>
+    </footer>
+
+    <!-- ===== SCRIPTS ===== -->
+    <script>
+        // ===== THREE.JS PARTICLE BACKGROUND =====
+        (function () {
+            const canvas = document.getElementById('bg-canvas');
+            const scene = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.z = 30;
+
+            const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+            // Wireframe Core
+            const coreGeo = new THREE.IcosahedronGeometry(12, 1);
+            const coreMat = new THREE.MeshBasicMaterial({ color: 0x8b5cf6, wireframe: true, transparent: true, opacity: 0.08 });
+            const core = new THREE.Mesh(coreGeo, coreMat);
+            scene.add(core);
+
+            // Particles
+            const pCount = 600;
+            const pGeo = new THREE.BufferGeometry();
+            const pPos = new Float32Array(pCount * 3);
+            for (let i = 0; i < pCount * 3; i++) pPos[i] = (Math.random() - 0.5) * 70;
+            pGeo.setAttribute('position', new THREE.BufferAttribute(pPos, 3));
+            const pMat = new THREE.PointsMaterial({ size: 0.12, color: 0x8b5cf6, transparent: true, opacity: 0.6, blending: THREE.AdditiveBlending });
+            const particles = new THREE.Points(pGeo, pMat);
+            scene.add(particles);
+
+            let mx = 0, my = 0;
+            document.addEventListener('mousemove', e => {
+                mx = (e.clientX - window.innerWidth / 2) * 0.001;
+                my = (e.clientY - window.innerHeight / 2) * 0.001;
+            });
+
+            function animate() {
+                requestAnimationFrame(animate);
+                core.rotation.y += 0.002;
+                core.rotation.x += 0.001;
+                const t = Date.now() * 0.001;
+                const s = 1 + Math.sin(t) * 0.04;
+                core.scale.set(s, s, s);
+                particles.rotation.y += 0.0004 + mx * 0.02;
+                particles.rotation.x += 0.0004 + my * 0.02;
+                renderer.render(scene, camera);
+            }
+            animate();
+
+            window.addEventListener('resize', () => {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+            });
+        })();
+
+        // ===== SCROLL REVEAL =====
+        const revealObserver = new IntersectionObserver((entries) => {
+            entries.forEach(e => {
+                if (e.isIntersecting) {
+                    e.target.classList.add('visible');
+                    revealObserver.unobserve(e.target);
+                }
+            });
+        }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+        document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
+
+        // ===== TERMINAL ANIMATION =====
+        const termLines = [
+            { text: 'Initializing ShadowTools v3.0.0...', cls: 'line-green', delay: 400 },
+            { text: '[OK] Privacy engine loaded', cls: 'line-cyan', delay: 300 },
+            { text: '[OK] WebAssembly sandbox active', cls: 'line-cyan', delay: 300 },
+            { text: '[OK] Client-side encryption: AES-256-GCM', cls: 'line-cyan', delay: 350 },
+            { text: '-----------------------------------', cls: 'line-gray', delay: 200 },
+            { text: 'Loading PDF Suite............ 40+ tools ✓', cls: 'line-purple', delay: 400 },
+            { text: 'Loading Image Suite.......... 24+ tools ✓', cls: 'line-purple', delay: 350 },
+            { text: 'Loading Video Suite.......... 40+ tools ✓', cls: 'line-purple', delay: 350 },
+            { text: 'Loading Audio Suite.......... 50+ tools ✓', cls: 'line-purple', delay: 350 },
+            { text: 'Loading Text Suite........... 28+ tools ✓', cls: 'line-purple', delay: 350 },
+            { text: '-----------------------------------', cls: 'line-gray', delay: 200 },
+            { text: 'All systems operational.', cls: 'line-green', delay: 500 },
+            { text: 'Data egress: 0 bytes. Privacy: MAXIMUM.', cls: 'line-white', delay: 600 },
+            { text: '$ _', cls: 'line-green cursor-blink', delay: 0 },
+        ];
+
+        let termEl = null;
+        let termStarted = false;
+
+        function runTerminal() {
+            if (termStarted) return;
+            termStarted = true;
+            termEl = document.getElementById('terminal-body');
+            let i = 0;
+            function nextLine() {
+                if (i >= termLines.length) return;
+                const l = termLines[i];
+                const div = document.createElement('div');
+                div.className = l.cls;
+                div.textContent = l.text;
+                termEl.appendChild(div);
+                termEl.scrollTop = termEl.scrollHeight;
+                i++;
+                if (l.delay > 0) setTimeout(nextLine, l.delay);
+            }
+            setTimeout(nextLine, 800);
+        }
+
+        const termObserver = new IntersectionObserver(entries => {
+            entries.forEach(e => { if (e.isIntersecting) runTerminal(); });
+        }, { threshold: 0.2 });
+        const termTarget = document.getElementById('terminal-body');
+        if (termTarget) termObserver.observe(termTarget);
+
+        // ===== AUTH MODAL =====
+        function openAuthModal(mode) {
+            document.getElementById('auth-overlay').classList.add('active');
+            switchAuthForm(mode || 'login');
+            document.body.style.overflow = 'hidden';
+        }
+        function closeAuthModal() {
+            document.getElementById('auth-overlay').classList.remove('active');
+            document.body.style.overflow = '';
+        }
+        function switchAuthForm(mode) {
+            document.getElementById('login-form').style.display = mode === 'login' ? 'block' : 'none';
+            document.getElementById('register-form').style.display = mode === 'register' ? 'block' : 'none';
+            // Clear errors
+            document.querySelectorAll('.auth-error').forEach(el => { el.classList.remove('show'); el.textContent = ''; });
+        }
+
+        function showError(id, msg) {
+            const el = document.getElementById(id);
+            el.textContent = msg;
+            el.classList.add('show');
+        }
+
+        function handleLogin() {
+            const email = document.getElementById('login-email').value.trim();
+            const pw = document.getElementById('login-password').value;
+            const result = ShadowAuth.login(email, pw);
+            if (!result.ok) return showError('login-error', result.msg);
+            closeAuthModal();
+            updateNavAuth();
+        }
+
+        function handleRegister() {
+            const name = document.getElementById('reg-name').value.trim();
+            const email = document.getElementById('reg-email').value.trim();
+            const pw = document.getElementById('reg-password').value;
+            const result = ShadowAuth.register(name, email, pw);
+            if (!result.ok) return showError('register-error', result.msg);
+            closeAuthModal();
+            updateNavAuth();
+        }
+
+        function updateNavAuth() {
+            const btn = document.getElementById('nav-login-btn');
+            const user = ShadowAuth.getCurrentUser();
+            if (user && btn) {
+                btn.innerHTML = `<img src="${user.avatar}" style="width:22px;height:22px;border-radius:50%;border:2px solid rgba(255,255,255,0.2);"> ${user.name.split(' ')[0]}`;
+                btn.onclick = () => {
+                    if (confirm('Logout from ShadowTools?')) {
+                        ShadowAuth.logout();
+                        updateNavAuth();
+                    }
+                };
+            } else if (btn) {
+                btn.innerHTML = '<i class="fas fa-fingerprint"></i> ACCESS';
+                btn.onclick = () => openAuthModal('login');
+            }
+        }
+
+        // Close modal on overlay click
+        document.getElementById('auth-overlay').addEventListener('click', function (e) {
+            if (e.target === this) closeAuthModal();
+        });
+
+        // Check hash for auth trigger
+        if (window.location.hash === '#auth') {
+            window.addEventListener('DOMContentLoaded', () => openAuthModal('login'));
+        }
+
+        // ===== MOBILE MENU =====
+        function toggleMobileMenu() {
+            document.getElementById('mobile-menu').classList.toggle('active');
+        }
+
+        // ===== INIT =====
+        document.addEventListener('DOMContentLoaded', () => {
+            updateNavAuth();
+        });
+    </script>
+</body>
+
+</html>
