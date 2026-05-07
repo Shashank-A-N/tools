@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QA-2 Advanced System</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#eff6ff',
+                            100: '#dbeafe',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/styles.css">
+
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- ShadowTools Unified Theme System -->
+    <link rel="stylesheet" href="shared/theme.css">
+    
+    <!-- ShadowTools Auth System -->
+    <link rel="stylesheet" href="shared/auth.css">
+    
+    <!-- ShadowTools Light Mode Text Fix -->
+    <style id="shadow-light-fix">
+        /* Specific fixes for blending into monolithic style */
+        .light-mode body { background-color: #f8fafc !important; color: #0f172a !important; }
+        .light-mode .surface-dark { background-color: #ffffff; border-color: #e2e8f0; }
+        .light-mode .text-dark { color: #1e293b; }
+        .light-mode .text-muted { color: #64748b; }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-200 h-screen flex flex-col overflow-hidden transition-colors duration-300">
+    
+    <!-- Theme Toggle (Standard ShadowTools Implementation) -->
+    <button onclick="toggleTheme()" class="theme-toggle-btn hidden" style="position:fixed;top:12px;right:12px;z-index:9999;"><i id="theme-icon" class="fas fa-moon"></i></button>
+
+    <!-- Header -->
+    <header class="h-16 border-b border-slate-800 bg-slate-900/50 backdrop-blur-md flex items-center justify-between px-6 shrink-0 surface-dark z-10 transition-colors duration-300">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/20">
+                <i class="fas fa-brain text-white text-lg"></i>
+            </div>
+            <div>
+                <h1 class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-emerald-400 to-teal-400">QA-2 Engine</h1>
+                <p class="text-xs text-slate-400 text-muted">Intelligent Q&A Assistant</p>
+            </div>
+        </div>
+        
+        <div class="flex items-center gap-4">
+            <!-- Nav Pills -->
+            <div class="hidden md:flex bg-slate-800/80 rounded-lg p-1 border border-slate-700/50 surface-dark">
+                <button class="nav-btn active px-4 py-1.5 rounded-md text-sm font-medium transition-all" data-tab="documents">
+                    <i class="fas fa-file-alt mr-2 text-indigo-400"></i> Documents
+                </button>
+                <button class="nav-btn px-4 py-1.5 rounded-md text-sm font-medium transition-all text-slate-400 hover:text-slate-200" data-tab="chat">
+                    <i class="fas fa-comments mr-2"></i> Chat
+                </button>
+            </div>
+
+            <!-- Upload Btn -->
+            <button id="header-upload-btn" class="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-sm font-medium transition-colors shadow-lg shadow-indigo-600/20">
+                <i class="fas fa-upload"></i> <span class="hidden sm:inline">Upload</span>
+            </button>
+            
+            <button id="custom-theme-toggle" class="w-10 h-10 rounded-lg border border-slate-700/50 flex items-center justify-center bg-slate-800 hover:bg-slate-700 text-amber-400 transition-colors surface-dark">
+                <i class="fas fa-sun text-lg"></i>
+            </button>
+            
+            <!-- Auth anchor -->
+            <div id="shadow-auth-ui" class="relative z-50"></div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-1 flex overflow-hidden">
+        
+        <!-- Sidebar -->
+        <aside class="w-72 border-r border-slate-800 bg-slate-900/30 flex flex-col shrink-0 surface-dark transition-all duration-300">
+            <div class="p-4 border-b border-slate-800 surface-dark">
+                <h2 class="text-sm font-semibold text-slate-300 uppercase tracking-wider text-dark">Data Sources</h2>
+            </div>
+            
+            <div class="flex-1 overflow-y-auto p-4 custom-scrollbar" id="document-list">
+                <!-- Empty State -->
+                <div id="empty-docs-state" class="text-center py-10 opacity-70">
+                    <div class="w-16 h-16 mx-auto bg-slate-800 rounded-full flex items-center justify-center border border-slate-700/50 mb-3 surface-dark">
+                        <i class="fas fa-folder-open text-2xl text-slate-500 text-muted"></i>
+                    </div>
+                    <p class="text-sm text-slate-400 text-muted leading-relaxed">Drop your PDFs here to begin semantic knowledge extraction.</p>
+                </div>
+                
+                <!-- Dynamic Document List Appears Here -->
+            </div>
+            
+            <div class="p-4 border-t border-slate-800 bg-slate-900/50 surface-dark">
+                <div class="flex items-center gap-2 text-xs text-emerald-400">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                    RAG Pipeline Active
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Workspace (Chat / Viewer) -->
+        <section class="flex-1 flex flex-col relative bg-slate-950/50 surface-dark overflow-hidden">
+            
+            <!-- Dropzone Overlay -->
+            <div id="dropzone-overlay" class="absolute inset-0 z-50 bg-indigo-900/80 backdrop-blur-sm border-2 border-dashed border-indigo-400 m-4 rounded-xl flex flex-col items-center justify-center opacity-0 pointer-events-none transition-opacity duration-300 hidden">
+                <i class="fas fa-cloud-upload-alt text-6xl text-indigo-300 mb-4 animate-bounce"></i>
+                <h2 class="text-2xl font-bold text-white mb-2">Drop files here to analyze</h2>
+                <p class="text-indigo-200">Supports PDF, DOCX, CSV</p>
+            </div>
+
+            <!-- Tab: Documents View -->
+            <div id="view-documents" class="tab-pane flex-1 flex flex-col h-full bg-slate-900/30">
+                <div class="flex-1 flex items-center justify-center p-8 text-center" id="viewer-placeholder">
+                    <div class="max-w-md">
+                        <div class="inline-flex w-20 h-20 bg-gradient-to-br from-indigo-500/20 to-purple-500/20 rounded-2xl items-center justify-center mb-6 border border-indigo-500/30">
+                            <i class="fas fa-file-pdf text-4xl text-indigo-400"></i>
+                        </div>
+                        <h2 class="text-2xl font-semibold text-slate-200 text-dark mb-3">No Active Document</h2>
+                        <p class="text-slate-400 text-muted text-sm leading-relaxed mb-6">Select a document from the sidebar to view its content and access extracted text chunks, or upload a new file.</p>
+                        
+                        <label for="main-file-upload" class="inline-flex items-center gap-2 px-6 py-3 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl cursor-pointer text-sm font-medium transition-colors border border-slate-700/50 surface-dark">
+                            <i class="fas fa-plus"></i> Browse Files
+                        </label>
+                        <input type="file" id="main-file-upload" class="hidden" multiple accept=".pdf,.txt,.md">
+                    </div>
+                </div>
+                <!-- Document Viewer Header (Hidden initially) -->
+                <div id="viewer-content" class="hidden flex-col h-full">
+                    <div class="h-14 border-b border-slate-800 flex items-center justify-between px-4 surface-dark bg-slate-900">
+                        <div class="flex items-center gap-3">
+                            <i class="fas fa-file-alt text-indigo-400"></i>
+                            <span id="active-doc-title" class="font-medium text-slate-200 text-dark">Document_Name.pdf</span>
+                        </div>
+                        <div id="active-doc-meta" class="text-xs text-slate-500 text-muted">14 Pages • Parsed with OCR</div>
+                    </div>
+                    <div class="flex-1 p-6 overflow-y-auto custom-scrollbar bg-white/5 dark:bg-transparent">
+                        <div class="max-w-4xl mx-auto bg-slate-900 border border-slate-800 rounded-xl p-8 shadow-2xl surface-dark min-h-[800px]">
+                            <div id="mock-doc-content" class="prose prose-invert prose-slate max-w-none text-slate-300 text-dark">
+                                <!-- Raw Text will be inserted here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab: Chat Interface -->
+            <div id="view-chat" class="tab-pane flex-1 flex flex-col h-full bg-slate-900/30 hidden">
+                <div class="flex-1 overflow-y-auto p-4 custom-scrollbar" id="chat-messages">
+                    
+                    <!-- Welcome Hero -->
+                    <div class="h-full flex flex-col items-center justify-center text-center p-8">
+                        <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-600 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/20 mb-6">
+                            <i class="fas fa-sparkles text-white text-2xl"></i>
+                        </div>
+                        <h2 class="text-2xl font-bold text-slate-200 text-dark mb-3">DocuMind Cognitive Chat</h2>
+                        <p class="text-slate-400 text-muted max-w-md mx-auto text-sm mb-8 leading-relaxed">
+                            I use an advanced RAG pipeline to search through your documents. Ask me anything, and I'll provide detailed answers with verifiable citations.
+                        </p>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 max-w-2xl w-full">
+                            <button class="suggest-btn text-left p-4 rounded-xl border border-slate-800 bg-slate-900/50 hover:bg-slate-800 hover:border-indigo-500/50 transition-all surface-dark group">
+                                <div class="flex items-center gap-3 mb-1">
+                                    <i class="fas fa-chart-line text-indigo-400 group-hover:scale-110 transition-transform"></i>
+                                    <span class="font-semibold text-slate-300 text-dark text-sm">Summarize key metrics</span>
+                                </div>
+                                <p class="text-xs text-slate-500 text-muted">What are the primary financial highlights across the reports?</p>
+                            </button>
+                            <button class="suggest-btn text-left p-4 rounded-xl border border-slate-800 bg-slate-900/50 hover:bg-slate-800 hover:border-purple-500/50 transition-all surface-dark group">
+                                <div class="flex items-center gap-3 mb-1">
+                                    <i class="fas fa-search text-purple-400 group-hover:scale-110 transition-transform"></i>
+                                    <span class="font-semibold text-slate-300 text-dark text-sm">Deep technical dive</span>
+                                </div>
+                                <p class="text-xs text-slate-500 text-muted">Explain the semantic chunking methodology used.</p>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Input Area -->
+                <div class="p-4 bg-slate-900/80 backdrop-blur-md border-t border-slate-800 surface-dark">
+                    <div class="max-w-4xl mx-auto relative group">
+                        <textarea id="chat-input" rows="1" placeholder="Ask a question about your documents... (Shift+Enter for newline)" class="w-full bg-slate-800 border border-slate-700/50 text-slate-200 placeholder-slate-500 rounded-xl pl-4 pr-14 py-4 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all resize-none overflow-hidden text-sm surface-dark" style="min-height: 52px; max-height: 200px;"></textarea>
+                        <button id="send-btn" class="absolute right-2 bottom-2 p-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg transition-transform hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed">
+                            <i class="fas fa-paper-plane text-sm"></i>
+                        </button>
+                    </div>
+                    <div class="max-w-4xl mx-auto flex items-center justify-between mt-2 px-1">
+                        <div class="flex items-center gap-4 text-[10px] text-slate-500 font-medium tracking-wide uppercase">
+                            <span class="flex items-center gap-1"><i class="fas fa-bolt text-amber-500"></i> Hybrid Search</span>
+                            <span class="flex items-center gap-1"><i class="fas fa-layer-group text-blue-400"></i> Semantic Chunking</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Upload Modal -->
+    <div id="upload-modal" class="fixed inset-0 z-[100] bg-slate-950/80 backdrop-blur-sm flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-300 hidden text-dark">
+        <div class="bg-slate-900 border border-slate-800 w-full max-w-lg mx-4 rounded-2xl shadow-2xl overflow-hidden transform scale-95 transition-transform duration-300 surface-dark" id="upload-modal-content">
+            <div class="px-6 py-4 border-b border-slate-800 flex items-center justify-between surface-dark bg-slate-900/50">
+                <h3 class="text-lg font-bold text-slate-200 text-dark">Ingest Documents</h3>
+                <button id="close-modal" class="text-slate-400 hover:text-slate-200 transition-colors bg-slate-800 w-8 h-8 rounded-full flex items-center justify-center surface-dark">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="p-8">
+                <div class="border-2 border-dashed border-slate-700 bg-slate-800/30 rounded-xl p-8 text-center hover:border-indigo-500/50 hover:bg-indigo-500/5 transition-all cursor-pointer surface-dark relative">
+                    <input type="file" id="modal-file-input" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" multiple accept=".pdf,.txt,.md">
+                    <div class="w-16 h-16 bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-4 border border-slate-700 shadow-inner surface-dark">
+                        <i class="fas fa-cloud-upload-alt text-2xl text-indigo-400"></i>
+                    </div>
+                    <h4 class="text-slate-200 font-semibold mb-1 text-dark">Select files or drag them here</h4>
+                    <p class="text-xs text-slate-500 text-muted mb-4">PDF, MD, TXT up to 50MB</p>
+                    <button class="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-slate-200 rounded-lg text-sm font-medium transition-colors border border-slate-600 pointer-events-none shadow-sm surface-dark">Browse Files</button>
+                </div>
+                
+                <div id="upload-queue" class="mt-4 space-y-2 hidden">
+                    <!-- Queue items injected via JS -->
+                </div>
+            </div>
+            <div class="px-6 py-4 border-t border-slate-800 bg-slate-900/50 flex justify-end surface-dark">
+                <button id="done-modal" class="px-6 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-sm font-medium transition-colors shadow-lg">Done</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- External Libs -->
+    <script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    
+    <!-- App Scripts -->
+    <!-- Core theme interop with ShadowTools -->
+    <script src="shared/theme.js"></script>
+    <script src="shared/auth.js" defer></script>
+    
+    <script>
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.min.js';
+    </script>
+    <script src="js/ragPipeline.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>

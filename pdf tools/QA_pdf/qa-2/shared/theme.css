@@ -1,0 +1,418 @@
+/* ============================================
+   SHADOW TOOLKIT — Unified Theme System
+   ============================================
+   Dark mode is the default. Light mode is
+   activated by adding .light-mode to <html>.
+   ============================================ */
+
+/* Dark Mode (Default) */
+:root {
+    --bg-primary: #020617;
+    --bg-secondary: #0f172a;
+    --bg-tertiary: #121929;
+    --bg-card: rgba(30, 41, 59, 0.3);
+    --bg-card-solid: #1e293b;
+    --bg-glass: rgba(15, 23, 42, 0.7);
+    --bg-glass-heavy: rgba(15, 23, 42, 0.95);
+    --bg-surface: rgba(255, 255, 255, 0.05);
+    --bg-surface-hover: rgba(255, 255, 255, 0.1);
+    --bg-input: transparent;
+    --bg-overlay: rgba(2, 6, 23, 0.8);
+
+    --text-primary: #f1f5f9;
+    --text-secondary: #94a3b8;
+    --text-muted: #64748b;
+    --text-dim: #475569;
+
+    --border-color: rgba(255, 255, 255, 0.08);
+    --border-hover: rgba(255, 255, 255, 0.15);
+    --border-subtle: rgba(255, 255, 255, 0.05);
+
+    --scrollbar-track: #020617;
+    --scrollbar-thumb: #1e293b;
+
+    --noise-opacity: 0.6;
+    --glow-opacity: 1;
+    --bg3d-opacity: 0.6;
+
+    --gradient-text-from: #fff;
+    --gradient-text-to: #94a3b8;
+
+    --cmd-bg: #0f172a;
+    --footer-bg: #020617;
+}
+
+/* Light Mode */
+.light-mode {
+    --bg-primary: #f8fafc;
+    --bg-secondary: #f1f5f9;
+    --bg-tertiary: #ffffff;
+    --bg-card: rgba(255, 255, 255, 0.7);
+    --bg-card-solid: #ffffff;
+    --bg-glass: rgba(255, 255, 255, 0.85);
+    --bg-glass-heavy: rgba(255, 255, 255, 0.95);
+    --bg-surface: rgba(0, 0, 0, 0.04);
+    --bg-surface-hover: rgba(0, 0, 0, 0.08);
+    --bg-input: #ffffff;
+    --bg-overlay: rgba(241, 245, 249, 0.85);
+
+    --text-primary: #0f172a;
+    --text-secondary: #475569;
+    --text-muted: #94a3b8;
+    --text-dim: #cbd5e1;
+
+    --border-color: rgba(0, 0, 0, 0.08);
+    --border-hover: rgba(0, 0, 0, 0.15);
+    --border-subtle: rgba(0, 0, 0, 0.05);
+
+    --scrollbar-track: #f1f5f9;
+    --scrollbar-thumb: #cbd5e1;
+
+    --noise-opacity: 0;
+    --glow-opacity: 0.3;
+    --bg3d-opacity: 0.15;
+
+    --gradient-text-from: #0f172a;
+    --gradient-text-to: #475569;
+
+    --cmd-bg: #ffffff;
+    --footer-bg: #f1f5f9;
+}
+
+/* ============================================
+   Section Hub Shared Overrides
+   These apply to the audio/image/text/video
+   hub pages that share a common template.
+   ============================================ */
+
+/* Body */
+body {
+    background-color: var(--bg-primary) !important;
+    color: var(--text-primary);
+    transition: background-color 0.4s ease, color 0.4s ease;
+}
+
+/* Noise overlay */
+.noise-overlay {
+    opacity: var(--noise-opacity) !important;
+    transition: opacity 0.4s ease;
+}
+
+/* 3D background container */
+#bg-3d-container {
+    opacity: var(--bg3d-opacity) !important;
+    transition: opacity 0.4s ease;
+}
+
+/* Background canvas */
+#bg-canvas {
+    opacity: calc(var(--bg3d-opacity) * 0.8) !important;
+    transition: opacity 0.4s ease;
+}
+
+/* Ambient glows */
+.light-mode .animate-pulse[class*="bg-"][class*="-900/"] {
+    opacity: var(--glow-opacity);
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar-track {
+    background: var(--scrollbar-track) !important;
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--scrollbar-thumb) !important;
+}
+
+/* Holographic cards */
+.holographic-card {
+    background: var(--bg-card) !important;
+    border-color: var(--border-color) !important;
+    transition: background 0.4s ease, border-color 0.3s ease, transform 0.1s ease, box-shadow 0.3s ease;
+}
+
+/* Glass panel (nav) */
+.glass-panel {
+    background: var(--bg-glass) !important;
+    border-bottom-color: var(--border-subtle) !important;
+    transition: background 0.4s ease;
+}
+
+/* Command palette backdrop */
+.cmd-palette-backdrop {
+    background: var(--bg-overlay) !important;
+    transition: background 0.4s ease;
+}
+
+/* Command palette content */
+#cmdContent {
+    background: var(--cmd-bg) !important;
+    border-color: var(--border-color) !important;
+    transition: background 0.4s ease;
+}
+
+#cmdInput {
+    color: var(--text-primary) !important;
+    background: transparent !important;
+}
+
+/* Text gradient */
+.text-gradient {
+    background: linear-gradient(135deg, var(--gradient-text-from) 0%, var(--gradient-text-to) 100%) !important;
+    -webkit-background-clip: text !important;
+    background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+}
+
+/* Nav dropdown menus */
+.nav-dropdown:not(.hidden),
+#apps-menu:not(.hidden),
+#filter-menu:not(.hidden) {
+    background: var(--bg-glass-heavy) !important;
+    border-color: var(--border-color) !important;
+    transition: background 0.4s ease;
+}
+
+/* Footer */
+footer {
+    background-color: var(--footer-bg) !important;
+    border-color: var(--border-subtle) !important;
+    transition: background-color 0.4s ease;
+}
+
+/* ============================================
+   Light Mode — Tailwind Class Overrides
+   These override hardcoded Tailwind utility
+   classes used in the section hub HTML.
+   ============================================ */
+
+/* Body text */
+.light-mode .text-slate-200 {
+    color: var(--text-primary) !important;
+}
+
+.light-mode .text-slate-300 {
+    color: var(--text-secondary) !important;
+}
+
+.light-mode .text-slate-400 {
+    color: var(--text-muted) !important;
+}
+
+.light-mode .text-slate-500 {
+    color: var(--text-dim) !important;
+}
+
+.light-mode .text-slate-600 {
+    color: #94a3b8 !important;
+}
+
+.light-mode .text-white {
+    color: var(--text-primary) !important;
+}
+
+/* Background overrides */
+.light-mode .bg-slate-950 {
+    background-color: var(--bg-primary) !important;
+}
+
+.light-mode .bg-slate-900 {
+    background-color: var(--bg-secondary) !important;
+}
+
+.light-mode .bg-slate-900\/50 {
+    background-color: rgba(241, 245, 249, 0.5) !important;
+}
+
+.light-mode .bg-slate-900\/95 {
+    background-color: rgba(255, 255, 255, 0.95) !important;
+}
+
+.light-mode .bg-slate-800\/50 {
+    background-color: rgba(226, 232, 240, 0.5) !important;
+}
+
+.light-mode .bg-slate-800 {
+    background-color: #e2e8f0 !important;
+}
+
+.light-mode .bg-slate-950\/50 {
+    background-color: rgba(241, 245, 249, 0.5) !important;
+}
+
+.light-mode .bg-slate-950\/30 {
+    background-color: rgba(241, 245, 249, 0.3) !important;
+}
+
+.light-mode .bg-slate-950\/80 {
+    background-color: rgba(248, 250, 252, 0.8) !important;
+}
+
+/* White/opacity backgrounds */
+.light-mode .bg-white\/5 {
+    background-color: rgba(0, 0, 0, 0.03) !important;
+}
+
+.light-mode .bg-white\/10 {
+    background-color: rgba(0, 0, 0, 0.06) !important;
+}
+
+.light-mode .bg-white\/20 {
+    background-color: rgba(0, 0, 0, 0.08) !important;
+}
+
+.light-mode .hover\:bg-white\/5:hover {
+    background-color: rgba(0, 0, 0, 0.03) !important;
+}
+
+.light-mode .hover\:bg-white\/10:hover {
+    background-color: rgba(0, 0, 0, 0.06) !important;
+}
+
+.light-mode .hover\:bg-white\/20:hover {
+    background-color: rgba(0, 0, 0, 0.08) !important;
+}
+
+/* Border overrides */
+.light-mode .border-white\/5 {
+    border-color: rgba(0, 0, 0, 0.05) !important;
+}
+
+.light-mode .border-white\/10 {
+    border-color: rgba(0, 0, 0, 0.08) !important;
+}
+
+.light-mode .border-slate-600 {
+    border-color: #cbd5e1 !important;
+}
+
+.light-mode .border-slate-700 {
+    border-color: #e2e8f0 !important;
+}
+
+/* KBD / code elements */
+.light-mode kbd {
+    background-color: #e2e8f0 !important;
+    border-color: #cbd5e1 !important;
+    color: var(--text-secondary) !important;
+}
+
+/* Filter buttons */
+.light-mode .filter-btn {
+    color: var(--text-secondary) !important;
+}
+
+.light-mode .filter-btn.active {
+    background-color: rgba(0, 0, 0, 0.08) !important;
+    color: var(--text-primary) !important;
+    border-color: rgba(0, 0, 0, 0.12) !important;
+}
+
+/* Hover states for text */
+.light-mode .hover\:text-white:hover {
+    color: var(--text-primary) !important;
+}
+
+/* Search bar in hero */
+.light-mode .text-slate-500.text-sm,
+.light-mode .text-slate-500.text-base {
+    color: var(--text-muted) !important;
+}
+
+/* Workflow CTA section */
+.light-mode .rounded-3xl.bg-slate-900 {
+    background-color: var(--bg-card-solid) !important;
+    border-color: var(--border-color) !important;
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.06) !important;
+}
+
+/* Workflow mock UI */
+.light-mode .bg-slate-950\/80 {
+    background-color: rgba(241, 245, 249, 0.9) !important;
+}
+
+.light-mode .bg-slate-500 {
+    background-color: #cbd5e1 !important;
+}
+
+.light-mode .bg-slate-700 {
+    background-color: #e2e8f0 !important;
+}
+
+/* No results state */
+.light-mode #noResults .text-slate-600 {
+    color: var(--text-muted) !important;
+}
+
+/* Theme toggle button */
+.theme-toggle-btn {
+    transition: transform 0.3s ease, background-color 0.3s ease;
+}
+
+.theme-toggle-btn:hover {
+    transform: rotate(15deg);
+}
+
+/* ============================================
+   Main PDF Tools Page Overrides
+   ============================================ */
+
+/* Glass effect for main page header */
+.light-mode .glass-effect {
+    background: var(--bg-glass) !important;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+}
+
+/* Apps dropdown */
+.light-mode #apps-dropdown .glass-effect,
+.light-mode #apps-dropdown>div {
+    background: var(--bg-glass-heavy) !important;
+    border-color: var(--border-color) !important;
+}
+
+/* Tool tooltip */
+.light-mode #tool-tooltip {
+    background: var(--bg-card-solid) !important;
+}
+
+.light-mode #tool-tooltip .bg-slate-800 {
+    background-color: var(--bg-card-solid) !important;
+}
+
+/* Full view modal */
+.light-mode #full-view-modal .bg-slate-900 {
+    background-color: var(--bg-card-solid) !important;
+}
+
+.light-mode #full-view-modal .bg-slate-900\/50 {
+    background-color: rgba(248, 250, 252, 0.5) !important;
+}
+
+/* Navigation links */
+.light-mode .nav-link {
+    color: var(--text-secondary) !important;
+}
+
+.light-mode .nav-link:hover {
+    color: var(--text-primary) !important;
+}
+
+/* Mega menu */
+.light-mode .mega-menu {
+    background: var(--bg-card-solid) !important;
+    border-color: var(--border-color) !important;
+}
+
+.light-mode .mega-menu-link {
+    color: var(--text-secondary) !important;
+}
+
+.light-mode .mega-menu-link:hover {
+    color: var(--text-primary) !important;
+    background: var(--bg-surface-hover) !important;
+}
+
+.light-mode .mega-menu-col h4 {
+    color: var(--text-muted) !important;
+}
