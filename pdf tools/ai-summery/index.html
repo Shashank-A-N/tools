@@ -1,0 +1,1230 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Document Summarizer</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #94a3b8;
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #64748b;
+        }
+
+        .drag-active {
+            border-color: #3b82f6 !important;
+            background-color: #eff6ff !important;
+            transform: scale(1.02);
+        }
+
+        .drag-active .drop-icon {
+            color: #3b82f6 !important;
+        }
+
+        .drag-active .drop-text {
+            color: #3b82f6 !important;
+        }
+
+        /* Markdown rendered styles */
+        .markdown-body h1 {
+            font-size: 1.6rem;
+            font-weight: 700;
+            margin: 1.2rem 0 0.6rem;
+            color: #1e293b;
+        }
+
+        .markdown-body h2 {
+            font-size: 1.35rem;
+            font-weight: 600;
+            margin: 1rem 0 0.5rem;
+            color: #334155;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 0.4rem;
+        }
+
+        .markdown-body h3 {
+            font-size: 1.15rem;
+            font-weight: 600;
+            margin: 0.8rem 0 0.4rem;
+            color: #475569;
+        }
+
+        .markdown-body p {
+            margin: 0.5rem 0;
+            line-height: 1.75;
+            color: #334155;
+        }
+
+        .markdown-body ul,
+        .markdown-body ol {
+            margin: 0.5rem 0 0.5rem 1.5rem;
+            color: #334155;
+        }
+
+        .markdown-body li {
+            margin: 0.3rem 0;
+            line-height: 1.7;
+        }
+
+        .markdown-body ul li {
+            list-style-type: disc;
+        }
+
+        .markdown-body ol li {
+            list-style-type: decimal;
+        }
+
+        .markdown-body strong {
+            font-weight: 600;
+            color: #1e293b;
+        }
+
+        .markdown-body em {
+            font-style: italic;
+        }
+
+        .markdown-body code {
+            background: #f1f5f9;
+            padding: 0.15rem 0.4rem;
+            border-radius: 4px;
+            font-size: 0.88rem;
+            color: #7c3aed;
+            font-family: 'Fira Code', monospace;
+        }
+
+        .markdown-body pre {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 1rem;
+            overflow-x: auto;
+            margin: 0.8rem 0;
+        }
+
+        .markdown-body pre code {
+            background: none;
+            padding: 0;
+            color: #334155;
+        }
+
+        .markdown-body blockquote {
+            border-left: 4px solid #3b82f6;
+            padding: 0.5rem 1rem;
+            margin: 0.8rem 0;
+            background: #f0f9ff;
+            border-radius: 0 6px 6px 0;
+            color: #1e40af;
+        }
+
+        .markdown-body hr {
+            border: none;
+            border-top: 2px solid #e2e8f0;
+            margin: 1.2rem 0;
+        }
+
+        @keyframes blink {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0;
+            }
+        }
+
+        .typing-cursor::after {
+            content: '|';
+            animation: blink 0.8s infinite;
+            color: #3b82f6;
+            margin-left: 2px;
+            font-weight: 300;
+        }
+
+        @keyframes pulse-ring {
+            0% {
+                transform: scale(0.9);
+                opacity: 1;
+            }
+
+            100% {
+                transform: scale(1.6);
+                opacity: 0;
+            }
+        }
+
+        .pulse-ring {
+            animation: pulse-ring 1.5s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(16px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .fade-in-up {
+            animation: fadeInUp 0.5s ease-out;
+        }
+
+        @keyframes successFlash {
+            0% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.12);
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        .success-flash {
+            animation: successFlash 0.3s ease;
+        }
+
+        @keyframes shimmer {
+            0% {
+                background-position: -400px 0;
+            }
+
+            100% {
+                background-position: 400px 0;
+            }
+        }
+
+        .skeleton-line {
+            height: 14px;
+            border-radius: 6px;
+            margin: 10px 0;
+            background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+            background-size: 400px 100%;
+            animation: shimmer 1.5s ease-in-out infinite;
+        }
+
+        .file-item {
+            transition: all 0.15s ease;
+        }
+
+        .file-item:hover {
+            background: #f1f5f9;
+        }
+
+        .file-item.active {
+            background: #eff6ff;
+            border-left: 3px solid #3b82f6;
+        }
+
+        .toggle-track {
+            width: 44px;
+            height: 24px;
+            border-radius: 12px;
+            position: relative;
+            cursor: pointer;
+            background: #cbd5e1;
+            transition: background 0.3s;
+        }
+
+        .toggle-track.active {
+            background: #3b82f6;
+        }
+
+        .toggle-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: white;
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            transition: transform 0.3s;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+        }
+
+        .toggle-track.active .toggle-thumb {
+            transform: translateX(20px);
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .animate-spin {
+            animation: spin 1s linear infinite;
+        }
+
+        /* =========================================
+           Responsive Design (Media Queries)
+           ========================================= */
+
+        /* Tablet adjustments */
+        @media (max-width: 1024px) {
+            aside.w-80 {
+                width: 260px !important;
+            }
+
+            main.ml-80 {
+                margin-left: 260px !important;
+            }
+        }
+
+        /* Mobile & Small Tablets */
+        @media (max-width: 768px) {
+
+            /* Reset Fixed Body Layout */
+            .flex.pt-\[57px\] {
+                padding-top: 0 !important;
+                flex-direction: column !important;
+            }
+
+            /* Navigation Bar */
+            nav.fixed {
+                position: static !important;
+                flex-direction: column !important;
+                align-items: flex-start !important;
+                padding: 1rem !important;
+                gap: 1rem !important;
+                height: auto !important;
+            }
+
+            nav>.flex.items-center {
+                width: 100% !important;
+                justify-content: space-between !important;
+                flex-wrap: wrap !important;
+                gap: 0.75rem !important;
+            }
+
+            nav input#apiKeyInput {
+                width: 100% !important;
+                min-width: unset !important;
+            }
+
+            nav .relative {
+                flex: 1 1 100% !important;
+            }
+
+            /* Sidebar */
+            aside.w-80 {
+                width: 100% !important;
+                position: static !important;
+                height: auto !important;
+                max-height: 45vh !important;
+                /* Allows scrolling if many files are uploaded */
+                border-right: none !important;
+                border-bottom: 2px solid #e2e8f0 !important;
+            }
+
+            /* Main Content Area */
+            main.ml-80 {
+                margin-left: 0 !important;
+                width: 100% !important;
+            }
+
+            /* Summary Header */
+            #summaryHeader {
+                position: static !important;
+                flex-direction: column !important;
+                align-items: flex-start !important;
+                padding: 1rem !important;
+                gap: 1rem !important;
+            }
+
+            #summaryHeader>div:last-child {
+                width: 100% !important;
+                flex-wrap: wrap !important;
+            }
+
+            #summaryHeader button,
+            #summaryHeader .bg-slate-50 {
+                flex: 1 1 auto !important;
+                justify-content: center !important;
+                margin: 0 !important;
+            }
+
+            /* Adjust padding for inner states */
+            #welcomeState,
+            #loadingState,
+            #summaryState,
+            #errorState {
+                padding: 1.5rem 1rem !important;
+            }
+
+            /* Welcome screen typography */
+            #welcomeState h2 {
+                font-size: 1.5rem !important;
+            }
+
+            #welcomeState .flex.items-center.gap-4 {
+                flex-wrap: wrap !important;
+            }
+        }
+
+        /* Small Phones */
+        @media (max-width: 480px) {
+            #summaryHeader>div:last-child {
+                flex-direction: column !important;
+            }
+
+            #summaryHeader button,
+            #summaryHeader .bg-slate-50 {
+                width: 100% !important;
+            }
+
+            /* Responsive Markdown Typography */
+            .markdown-body h1 {
+                font-size: 1.3rem !important;
+            }
+
+            .markdown-body h2 {
+                font-size: 1.15rem !important;
+            }
+
+            /* Center the toast notification on small screens */
+            #toast {
+                left: 1.5rem !important;
+                right: 1.5rem !important;
+                bottom: 1.5rem !important;
+                justify-content: center !important;
+            }
+        }
+    </style>
+</head>
+
+<body class="bg-slate-50 min-h-screen">
+
+    <!-- Top Navigation Bar -->
+    <nav
+        class="bg-white border-b border-slate-200 px-6 py-3 flex items-center justify-between fixed top-0 left-0 right-0 z-50 shadow-sm">
+        <div class="flex items-center gap-3">
+            <div
+                class="w-9 h-9 bg-gradient-to-br from-blue-500 to-blue-700 rounded-lg flex items-center justify-center shadow-md">
+                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+            </div>
+            <div>
+                <h1 class="text-lg font-semibold text-slate-800 tracking-tight">AI Document Summarizer</h1>
+                <p class="text-xs text-slate-400 -mt-0.5">Powered by Gemini</p>
+            </div>
+        </div>
+        <div class="flex items-center gap-3">
+            <div class="relative">
+                <input type="password" id="apiKeyInput" placeholder="Enter Gemini API Key"
+                    class="text-sm border border-slate-200 rounded-lg px-3 py-2 w-64 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-slate-50 placeholder-slate-400 pr-9">
+                <button onclick="toggleApiKeyVisibility()"
+                    class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 cursor-pointer">
+                    <svg id="eyeIcon" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                    </svg>
+                </button>
+            </div>
+            <div id="apiStatus" class="flex items-center gap-1.5 text-xs text-slate-400 min-w-[80px]">
+                <span class="w-2 h-2 rounded-full bg-slate-300"></span>
+                <span>No key</span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Layout -->
+    <div class="flex pt-[57px] min-h-screen">
+
+        <!-- Sidebar -->
+        <aside class="w-80 bg-white border-r border-slate-200 flex flex-col fixed top-[57px] bottom-0 left-0 z-40">
+            <!-- Upload Zone -->
+            <div class="p-4">
+                <div id="dropZone"
+                    class="border-2 border-dashed border-slate-300 rounded-xl p-6 text-center cursor-pointer hover:border-blue-400 hover:bg-blue-50/50 transition-all duration-200"
+                    onclick="document.getElementById('fileInput').click()">
+                    <input type="file" id="fileInput" class="hidden" accept=".pdf,.txt,.md" multiple>
+                    <div class="drop-icon text-slate-400 mb-2">
+                        <svg class="w-10 h-10 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                        </svg>
+                    </div>
+                    <p class="drop-text text-sm font-medium text-slate-600">Drop files here or click to browse</p>
+                    <p class="text-xs text-slate-400 mt-1">Supports PDF, TXT, and Markdown</p>
+                </div>
+            </div>
+
+            <!-- File List -->
+            <div class="flex-1 px-4">
+                <div class="flex items-center justify-between mb-2">
+                    <h3 class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Uploaded Files</h3>
+                    <span id="fileCount" class="text-xs text-slate-400">0 files</span>
+                </div>
+                <div id="fileList" class="space-y-1">
+                    <div class="text-center py-8">
+                        <svg class="w-12 h-12 mx-auto text-slate-200 mb-2" fill="none" stroke="currentColor"
+                            viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                d="M5 19a2 2 0 01-2-2V7a2 2 0 012-2h4l2 2h4a2 2 0 012 2v1M5 19h14a2 2 0 002-2v-5a2 2 0 00-2-2H9a2 2 0 00-2 2v5a2 2 0 01-2 2z" />
+                        </svg>
+                        <p class="text-sm text-slate-400">No files uploaded yet</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Privacy Note -->
+            <div class="p-4 border-t border-slate-100">
+                <div class="bg-slate-50 rounded-lg p-3 flex items-start gap-2">
+                    <svg class="w-4 h-4 text-blue-500 mt-0.5 shrink-0" fill="none" stroke="currentColor"
+                        viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                    </svg>
+                    <div>
+                        <p class="text-xs font-medium text-slate-600">Privacy Notice</p>
+                        <p class="text-xs text-slate-400 mt-0.5 leading-relaxed">This interface runs entirely
+                            client-side. File content is sent only to the Gemini API for summarization. No data is
+                            stored on any server.</p>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="ml-80 flex-1 flex flex-col">
+            <!-- Summary Header Bar -->
+            <div id="summaryHeader"
+                class="bg-white border-b border-slate-200 px-8 py-4 flex items-center justify-between sticky top-[57px] z-30 hidden">
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                        <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                    </div>
+                    <div>
+                        <h2 id="activeFileName" class="text-sm font-semibold text-slate-800">filename.txt</h2>
+                        <p id="activeFileMeta" class="text-xs text-slate-400">Summarized just now</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2">
+                    <!-- Edit Toggle -->
+                    <div class="flex items-center gap-2 mr-3 px-3 py-1.5 rounded-lg bg-slate-50">
+                        <span class="text-xs font-medium text-slate-500">Manual Edit</span>
+                        <div id="editToggle" class="toggle-track" onclick="toggleEditMode()">
+                            <div class="toggle-thumb"></div>
+                        </div>
+                    </div>
+                    <!-- Copy Button -->
+                    <button id="copyBtn" onclick="copyToClipboard()"
+                        class="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-slate-600 bg-slate-100 rounded-lg hover:bg-slate-200 active:scale-95 cursor-pointer">
+                        <svg id="copyIcon" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                        </svg>
+                        <span id="copyText">Copy</span>
+                    </button>
+                    <!-- Download Button -->
+                    <button id="downloadBtn" onclick="downloadMarkdown()"
+                        class="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 active:scale-95 shadow-sm cursor-pointer">
+                        <svg id="downloadIcon" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        <span id="downloadText">Download .md</span>
+                    </button>
+                    <!-- Re-summarize Button -->
+                    <button onclick="resummarizeActive()"
+                        class="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100 active:scale-95 cursor-pointer"
+                        title="Re-summarize">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Welcome State -->
+            <div id="welcomeState" class="flex-1 flex items-center justify-center p-8">
+                <div class="text-center max-w-lg">
+                    <div
+                        class="w-20 h-20 bg-gradient-to-br from-blue-100 to-blue-200 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                        <svg class="w-10 h-10 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+                        </svg>
+                    </div>
+                    <h2 class="text-2xl font-bold text-slate-800 mb-2">Summarize any document instantly</h2>
+                    <p class="text-slate-500 mb-6 leading-relaxed">Upload a PDF, TXT, or Markdown file and get an
+                        AI-powered summary in seconds. Edit, copy, or download the results.</p>
+                    <div class="flex items-center justify-center gap-4 text-sm text-slate-400">
+                        <div class="flex items-center gap-1.5">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <span>PDF files</span>
+                        </div>
+                        <div class="flex items-center gap-1.5">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <span>Text files</span>
+                        </div>
+                        <div class="flex items-center gap-1.5">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <span>Markdown</span>
+                        </div>
+                    </div>
+                    <div class="mt-8">
+                        <button onclick="document.getElementById('fileInput').click()"
+                            class="px-6 py-3 bg-blue-600 text-white font-medium rounded-xl hover:bg-blue-700 active:scale-95 shadow-lg shadow-blue-200 cursor-pointer">
+                            <span class="flex items-center gap-2">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                                </svg>
+                                Upload your first file
+                            </span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Loading State -->
+            <div id="loadingState" class="flex-1 p-8 hidden">
+                <div class="max-w-3xl mx-auto fade-in-up">
+                    <div class="flex items-center gap-3 mb-6">
+                        <div class="relative">
+                            <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                                <svg class="w-5 h-5 text-blue-600 animate-spin" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
+                                        stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor"
+                                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                                    </path>
+                                </svg>
+                            </div>
+                            <div class="absolute inset-0 w-10 h-10 bg-blue-200 rounded-full pulse-ring"></div>
+                        </div>
+                        <div>
+                            <p class="text-sm font-semibold text-slate-700">Gemini is reading your document...</p>
+                            <p id="loadingMeta" class="text-xs text-slate-400">Analyzing content and generating summary
+                            </p>
+                        </div>
+                    </div>
+                    <div class="space-y-1">
+                        <div class="skeleton-line w-full"></div>
+                        <div class="skeleton-line w-11/12"></div>
+                        <div class="skeleton-line w-4/5"></div>
+                        <div class="skeleton-line w-full" style="margin-top:20px"></div>
+                        <div class="skeleton-line w-10/12"></div>
+                        <div class="skeleton-line w-3/4"></div>
+                        <div class="skeleton-line w-5/6" style="margin-top:20px"></div>
+                        <div class="skeleton-line w-full"></div>
+                        <div class="skeleton-line w-2/3"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Summary State -->
+            <div id="summaryState" class="flex-1 p-8 hidden">
+                <div class="max-w-3xl mx-auto fade-in-up">
+                    <div id="markdownView" class="markdown-body"></div>
+                    <div id="editView" class="hidden">
+                        <textarea id="editTextarea"
+                            class="w-full p-6 border border-slate-200 rounded-xl bg-white text-sm text-slate-700 font-mono leading-relaxed resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm"
+                            style="min-height: calc(100vh - 220px)" placeholder="Edit your summary here..."></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Error State -->
+            <div id="errorState" class="flex-1 flex items-center justify-center p-8 hidden">
+                <div class="text-center max-w-md fade-in-up">
+                    <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <svg class="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                        </svg>
+                    </div>
+                    <h3 class="text-lg font-semibold text-slate-800 mb-2">Something went wrong</h3>
+                    <p id="errorMessage" class="text-sm text-slate-500 mb-4">An error occurred while processing your
+                        document.</p>
+                    <button onclick="resummarizeActive()"
+                        class="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 active:scale-95 cursor-pointer">
+                        Try Again
+                    </button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast"
+        class="fixed bottom-6 right-6 bg-slate-800 text-white px-4 py-3 rounded-xl shadow-2xl flex items-center gap-2 text-sm font-medium z-[100]"
+        style="transform: translateY(80px); opacity: 0; transition: all 0.3s ease;">
+        <svg id="toastIcon" class="w-4 h-4 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+        </svg>
+        <span id="toastMessage">Copied to clipboard</span>
+    </div>
+
+    <!-- ==================== JAVASCRIPT (No ESM, no module, just plain script) ==================== -->
+    <script>
+        // ───────────── State ─────────────
+        var files = [];          // { id, name, size, type, text, summary, timestamp }
+        var activeFileId = null;
+        var isEditMode = false;
+        var apiKey = '';
+
+        // Gemini REST API config
+        var GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent';
+
+        // ───────────── Init ─────────────
+        document.addEventListener('DOMContentLoaded', function () {
+            console.log('[Summarizer] App initialized');
+            setupDragAndDrop();
+            setupFileInput();
+            setupApiKey();
+        });
+
+        // ───────────── API Key ─────────────
+        function setupApiKey() {
+            var input = document.getElementById('apiKeyInput');
+            var saved = localStorage.getItem('gemini_api_key');
+            if (saved) {
+                input.value = saved;
+                apiKey = saved;
+                updateApiStatus(true);
+                console.log('[Summarizer] API key loaded from localStorage');
+            }
+
+            var debounceTimer = null;
+            input.addEventListener('input', function (e) {
+                clearTimeout(debounceTimer);
+                debounceTimer = setTimeout(function () {
+                    var key = e.target.value.trim();
+                    if (key) {
+                        apiKey = key;
+                        localStorage.setItem('gemini_api_key', key);
+                        updateApiStatus(true);
+                        console.log('[Summarizer] API key saved');
+                    } else {
+                        apiKey = '';
+                        localStorage.removeItem('gemini_api_key');
+                        updateApiStatus(false);
+                    }
+                }, 400);
+            });
+        }
+
+        function updateApiStatus(connected) {
+            var el = document.getElementById('apiStatus');
+            if (connected) {
+                el.innerHTML = '<span class="w-2 h-2 rounded-full bg-green-400 inline-block"></span><span class="text-green-600">Connected</span>';
+            } else {
+                el.innerHTML = '<span class="w-2 h-2 rounded-full bg-slate-300 inline-block"></span><span>No key</span>';
+            }
+        }
+
+        function toggleApiKeyVisibility() {
+            var input = document.getElementById('apiKeyInput');
+            input.type = input.type === 'password' ? 'text' : 'password';
+        }
+
+        // ───────────── Drag & Drop ─────────────
+        function setupDragAndDrop() {
+            var zone = document.getElementById('dropZone');
+
+            zone.addEventListener('dragenter', function (e) { e.preventDefault(); e.stopPropagation(); zone.classList.add('drag-active'); });
+            zone.addEventListener('dragover', function (e) { e.preventDefault(); e.stopPropagation(); zone.classList.add('drag-active'); });
+            zone.addEventListener('dragleave', function (e) { e.preventDefault(); e.stopPropagation(); zone.classList.remove('drag-active'); });
+            zone.addEventListener('drop', function (e) {
+                e.preventDefault(); e.stopPropagation();
+                zone.classList.remove('drag-active');
+                if (e.dataTransfer && e.dataTransfer.files.length) {
+                    handleFiles(e.dataTransfer.files);
+                }
+            });
+
+            // Also allow dropping on the whole page
+            document.body.addEventListener('dragover', function (e) { e.preventDefault(); });
+            document.body.addEventListener('drop', function (e) {
+                e.preventDefault();
+                if (e.dataTransfer && e.dataTransfer.files.length) {
+                    handleFiles(e.dataTransfer.files);
+                }
+            });
+
+            console.log('[Summarizer] Drag and drop initialized');
+        }
+
+        function setupFileInput() {
+            document.getElementById('fileInput').addEventListener('change', function (e) {
+                if (e.target.files.length) {
+                    console.log('[Summarizer] Files selected via input:', e.target.files.length);
+                    handleFiles(e.target.files);
+                }
+                e.target.value = '';
+            });
+            console.log('[Summarizer] File input initialized');
+        }
+
+        // ───────────── File Handling ─────────────
+        async function handleFiles(fileList) {
+            var validExts = ['.pdf', '.txt', '.md'];
+
+            for (var i = 0; i < fileList.length; i++) {
+                var file = fileList[i];
+                var ext = '.' + file.name.split('.').pop().toLowerCase();
+
+                if (validExts.indexOf(ext) === -1) {
+                    showToast('Unsupported file type: ' + ext, true);
+                    continue;
+                }
+
+                console.log('[Summarizer] Processing file:', file.name, 'Type:', ext, 'Size:', file.size);
+
+                var id = generateId();
+                var entry = {
+                    id: id, name: file.name, size: file.size,
+                    type: ext, text: '', summary: '', timestamp: Date.now()
+                };
+
+                try {
+                    entry.text = await extractText(file, ext);
+                    console.log('[Summarizer] Extracted text length:', entry.text.length);
+
+                    if (!entry.text.trim()) {
+                        showToast('Could not extract text from ' + file.name, true);
+                        continue;
+                    }
+
+                    files.push(entry);
+                    renderFileList();
+                    selectFile(id);
+                    summarizeFile(id);
+                } catch (err) {
+                    console.error('[Summarizer] Error reading file:', err);
+                    showToast('Error reading ' + file.name + ': ' + err.message, true);
+                }
+            }
+        }
+
+        function generateId() {
+            return 'file_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+        }
+
+        async function extractText(file, ext) {
+            if (ext === '.pdf') {
+                return await extractPdfText(file);
+            }
+            return new Promise(function (resolve, reject) {
+                var reader = new FileReader();
+                reader.onload = function (e) { resolve(e.target.result); };
+                reader.onerror = function () { reject(new Error('Failed to read file')); };
+                reader.readAsText(file);
+            });
+        }
+
+        async function extractPdfText(file) {
+            try {
+                var arrayBuffer = await file.arrayBuffer();
+                pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+                var pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+                var fullText = '';
+                for (var i = 1; i <= pdf.numPages; i++) {
+                    var page = await pdf.getPage(i);
+                    var content = await page.getTextContent();
+                    var strings = content.items.map(function (item) { return item.str; });
+                    fullText += strings.join(' ') + '\n\n';
+                }
+                console.log('[Summarizer] PDF extracted, pages:', pdf.numPages);
+                return fullText;
+            } catch (err) {
+                console.error('[Summarizer] PDF extraction error:', err);
+                throw new Error('Failed to extract PDF text: ' + err.message);
+            }
+        }
+
+        // ───────────── AI Summarization (Direct REST API) ─────────────
+        async function summarizeFile(fileId) {
+            var file = files.find(function (f) { return f.id === fileId; });
+            if (!file) return;
+
+            if (!apiKey) {
+                showState('error');
+                document.getElementById('errorMessage').textContent =
+                    'Please enter your Gemini API key in the top-right corner to enable summarization.';
+                return;
+            }
+
+            showState('loading');
+            document.getElementById('loadingMeta').textContent =
+                'Analyzing "' + file.name + '" (' + formatSize(file.size) + ')';
+
+            console.log('[Summarizer] Starting summarization for:', file.name);
+
+            var prompt = 'You are an expert document summarizer. Analyze the following document and provide a comprehensive, well-structured summary in Markdown format.\n\nYour summary should include:\n- A clear **title** as an H2 heading\n- A brief **overview** paragraph (2-3 sentences)\n- **Key Points** as a bulleted list\n- **Main Findings / Details** section with the most important information\n- A concise **Conclusion** if applicable\n\nUse proper Markdown formatting: headers, bold text, bullet points, and numbered lists where appropriate. Keep the summary informative yet concise.\n\n---\n\nDOCUMENT CONTENT:\n\n' + file.text.substring(0, 30000);
+
+            try {
+                var url = GEMINI_API_URL + '?key=' + encodeURIComponent(apiKey);
+
+                var body = {
+                    contents: [{
+                        parts: [{
+                            text: prompt
+                        }]
+                    }]
+                };
+
+                console.log('[Summarizer] Calling Gemini API...');
+
+                var response = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body)
+                });
+
+                console.log('[Summarizer] API response status:', response.status);
+
+                if (!response.ok) {
+                    var errorData = await response.json().catch(function () { return {}; });
+                    var errorMsg = (errorData.error && errorData.error.message) || ('API error: HTTP ' + response.status);
+                    console.error('[Summarizer] API error:', errorMsg);
+                    throw new Error(errorMsg);
+                }
+
+                var data = await response.json();
+                console.log('[Summarizer] API response received');
+
+                // Extract text from response
+                var summary = '';
+                if (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts) {
+                    summary = data.candidates[0].content.parts.map(function (p) { return p.text || ''; }).join('');
+                }
+
+                if (!summary) {
+                    throw new Error('No summary text received from the API. Response: ' + JSON.stringify(data).substring(0, 200));
+                }
+
+                file.summary = summary;
+                file.timestamp = Date.now();
+                renderFileList();
+
+                if (activeFileId === fileId) {
+                    showSummary(file);
+                }
+
+                console.log('[Summarizer] Summary generated successfully, length:', summary.length);
+
+            } catch (err) {
+                console.error('[Summarizer] Summarization error:', err);
+                if (activeFileId === fileId) {
+                    showState('error');
+                    document.getElementById('errorMessage').textContent =
+                        err.message || 'Failed to generate summary. Please check your API key and try again.';
+                }
+            }
+        }
+
+        function resummarizeActive() {
+            if (activeFileId) {
+                var file = files.find(function (f) { return f.id === activeFileId; });
+                if (file) {
+                    console.log('[Summarizer] Re-summarizing:', file.name);
+                    summarizeFile(activeFileId);
+                }
+            }
+        }
+
+        // ───────────── UI State ─────────────
+        function showState(state) {
+            var ids = ['welcomeState', 'loadingState', 'summaryState', 'errorState'];
+            ids.forEach(function (id) { document.getElementById(id).classList.add('hidden'); });
+
+            if (state === 'welcome') {
+                document.getElementById('welcomeState').classList.remove('hidden');
+                document.getElementById('summaryHeader').classList.add('hidden');
+            } else if (state === 'loading') {
+                document.getElementById('loadingState').classList.remove('hidden');
+                document.getElementById('summaryHeader').classList.add('hidden');
+            } else if (state === 'summary') {
+                document.getElementById('summaryState').classList.remove('hidden');
+                document.getElementById('summaryHeader').classList.remove('hidden');
+            } else if (state === 'error') {
+                document.getElementById('errorState').classList.remove('hidden');
+                document.getElementById('summaryHeader').classList.add('hidden');
+            }
+        }
+
+        function showSummary(file) {
+            showState('summary');
+            document.getElementById('activeFileName').textContent = file.name;
+            document.getElementById('activeFileMeta').textContent =
+                formatSize(file.size) + ' \u00B7 Summarized ' + timeAgo(file.timestamp);
+
+            var rendered = marked.parse(file.summary);
+            document.getElementById('markdownView').innerHTML = rendered;
+            document.getElementById('editTextarea').value = file.summary;
+
+            // Reset edit mode
+            if (isEditMode) {
+                isEditMode = false;
+                document.getElementById('editToggle').classList.remove('active');
+                document.getElementById('editView').classList.add('hidden');
+                document.getElementById('markdownView').classList.remove('hidden');
+            }
+        }
+
+        // ───────────── File List ─────────────
+        function renderFileList() {
+            var container = document.getElementById('fileList');
+            document.getElementById('fileCount').textContent = files.length + ' file' + (files.length !== 1 ? 's' : '');
+
+            if (files.length === 0) {
+                container.innerHTML =
+                    '<div class="text-center py-8">' +
+                    '<svg class="w-12 h-12 mx-auto text-slate-200 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">' +
+                    '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M5 19a2 2 0 01-2-2V7a2 2 0 012-2h4l2 2h4a2 2 0 012 2v1M5 19h14a2 2 0 002-2v-5a2 2 0 00-2-2H9a2 2 0 00-2 2v5a2 2 0 01-2 2z"/>' +
+                    '</svg>' +
+                    '<p class="text-sm text-slate-400">No files uploaded yet</p>' +
+                    '</div>';
+                return;
+            }
+
+            var html = '';
+            for (var i = 0; i < files.length; i++) {
+                var f = files[i];
+                var isActive = f.id === activeFileId;
+                var icon = getFileIcon(f.type);
+                var statusText = f.summary ? '\u2713 Summarized' : 'Processing...';
+                html +=
+                    '<div class="file-item flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer ' + (isActive ? 'active' : '') + '"' +
+                    ' onclick="selectFile(\'' + f.id + '\')">' +
+                    '<div class="w-8 h-8 ' + (isActive ? 'bg-blue-100' : 'bg-slate-100') + ' rounded-lg flex items-center justify-center shrink-0">' +
+                    icon +
+                    '</div>' +
+                    '<div class="flex-1 min-w-0">' +
+                    '<p class="text-sm font-medium text-slate-700 truncate">' + escapeHtml(f.name) + '</p>' +
+                    '<p class="text-xs text-slate-400">' + formatSize(f.size) + ' \u00B7 ' + statusText + '</p>' +
+                    '</div>' +
+                    '<button onclick="event.stopPropagation(); removeFile(\'' + f.id + '\')"' +
+                    ' class="text-slate-300 hover:text-red-500 shrink-0 p-1 hover:bg-red-50 rounded cursor-pointer opacity-0 transition-opacity duration-150">' +
+                    '<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">' +
+                    '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>' +
+                    '</svg>' +
+                    '</button>' +
+                    '</div>';
+            }
+            container.innerHTML = html;
+
+            // Make close buttons visible on hover
+            var items = container.querySelectorAll('.file-item');
+            items.forEach(function (item) {
+                var btn = item.querySelector('button');
+                item.addEventListener('mouseenter', function () { btn.style.opacity = '1'; });
+                item.addEventListener('mouseleave', function () { btn.style.opacity = '0'; });
+            });
+        }
+
+        function selectFile(id) {
+            activeFileId = id;
+            var file = files.find(function (f) { return f.id === id; });
+            renderFileList();
+            if (file && file.summary) {
+                showSummary(file);
+            } else if (file) {
+                showState('loading');
+            }
+        }
+
+        function removeFile(id) {
+            files = files.filter(function (f) { return f.id !== id; });
+            renderFileList();
+            if (activeFileId === id) {
+                activeFileId = files.length > 0 ? files[0].id : null;
+                if (activeFileId) {
+                    selectFile(activeFileId);
+                } else {
+                    showState('welcome');
+                }
+            }
+        }
+
+        function getFileIcon(type) {
+            var colors = { '.pdf': 'text-red-500', '.txt': 'text-blue-500', '.md': 'text-purple-500' };
+            var color = colors[type] || 'text-slate-500';
+            if (type === '.pdf') {
+                return '<svg class="w-4 h-4 ' + color + '" fill="currentColor" viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zM6 20V4h7v5h5v11H6z"/></svg>';
+            }
+            return '<svg class="w-4 h-4 ' + color + '" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>';
+        }
+
+        // ───────────── Edit Mode Toggle ─────────────
+        function toggleEditMode() {
+            isEditMode = !isEditMode;
+            var toggle = document.getElementById('editToggle');
+            var markdownView = document.getElementById('markdownView');
+            var editView = document.getElementById('editView');
+            var textarea = document.getElementById('editTextarea');
+
+            toggle.classList.toggle('active', isEditMode);
+
+            if (isEditMode) {
+                var file = files.find(function (f) { return f.id === activeFileId; });
+                if (file) textarea.value = file.summary;
+                markdownView.classList.add('hidden');
+                editView.classList.remove('hidden');
+                textarea.focus();
+            } else {
+                var file = files.find(function (f) { return f.id === activeFileId; });
+                if (file) {
+                    file.summary = textarea.value;
+                    markdownView.innerHTML = marked.parse(file.summary);
+                }
+                editView.classList.add('hidden');
+                markdownView.classList.remove('hidden');
+            }
+        }
+
+        // ───────────── Copy & Download ─────────────
+        async function copyToClipboard() {
+            var file = files.find(function (f) { return f.id === activeFileId; });
+            if (!file || !file.summary) return;
+
+            try {
+                await navigator.clipboard.writeText(file.summary);
+                var btn = document.getElementById('copyBtn');
+                var icon = document.getElementById('copyIcon');
+                var text = document.getElementById('copyText');
+
+                btn.classList.add('success-flash');
+                icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>';
+                icon.classList.add('text-green-500');
+                text.textContent = 'Copied!';
+
+                setTimeout(function () {
+                    btn.classList.remove('success-flash');
+                    icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>';
+                    icon.classList.remove('text-green-500');
+                    text.textContent = 'Copy';
+                }, 2000);
+
+                showToast('Copied to clipboard');
+            } catch (e) {
+                showToast('Failed to copy', true);
+            }
+        }
+
+        function downloadMarkdown() {
+            var file = files.find(function (f) { return f.id === activeFileId; });
+            if (!file || !file.summary) return;
+
+            var blob = new Blob([file.summary], { type: 'text/markdown' });
+            var url = URL.createObjectURL(blob);
+            var a = document.createElement('a');
+            a.href = url;
+            a.download = file.name.replace(/\.[^.]+$/, '') + '_summary.md';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+
+            var btn = document.getElementById('downloadBtn');
+            var text = document.getElementById('downloadText');
+            btn.classList.add('success-flash');
+            text.textContent = 'Downloaded!';
+            setTimeout(function () {
+                btn.classList.remove('success-flash');
+                text.textContent = 'Download .md';
+            }, 2000);
+
+            showToast('Downloaded as Markdown');
+        }
+
+        // ───────────── Toast ─────────────
+        var toastTimer = null;
+        function showToast(message, isError) {
+            var toast = document.getElementById('toast');
+            var icon = document.getElementById('toastIcon');
+            var msg = document.getElementById('toastMessage');
+
+            msg.textContent = message;
+            if (isError) {
+                icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01"/>';
+                icon.className = 'w-4 h-4 text-red-400';
+            } else {
+                icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>';
+                icon.className = 'w-4 h-4 text-green-400';
+            }
+
+            toast.style.transform = 'translateY(0)';
+            toast.style.opacity = '1';
+
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(function () {
+                toast.style.transform = 'translateY(80px)';
+                toast.style.opacity = '0';
+            }, 3000);
+        }
+
+        // ───────────── Helpers ─────────────
+        function formatSize(bytes) {
+            if (bytes < 1024) return bytes + ' B';
+            if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
+            return (bytes / 1048576).toFixed(1) + ' MB';
+        }
+
+        function timeAgo(timestamp) {
+            var diff = Date.now() - timestamp;
+            if (diff < 60000) return 'just now';
+            if (diff < 3600000) return Math.floor(diff / 60000) + 'm ago';
+            if (diff < 86400000) return Math.floor(diff / 3600000) + 'h ago';
+            return Math.floor(diff / 86400000) + 'd ago';
+        }
+
+        function escapeHtml(str) {
+            var div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
+        }
+    </script>
+</body>
+
+</html>
