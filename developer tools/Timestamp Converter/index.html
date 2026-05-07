@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shadow Dev - Timestamp Converter</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Orbitron:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="../../shared/theme.css">
+    <script src="../../shared/theme.js"></script>
+    <link rel="stylesheet" href="../../shared/auth.css">
+    <script src="../../shared/auth.js" defer></script>
+    <style>
+        *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+        html{scroll-behavior:smooth}
+        body{font-family:'Inter',sans-serif;background:#030712;color:#f1f5f9;min-height:100vh;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+        .font-orbitron{font-family:'Orbitron',sans-serif}
+        .font-mono{font-family:'JetBrains Mono',monospace}
+        .font-rajdhani{font-family:'Rajdhani',sans-serif}
+
+        /* Nav */
+        .tool-nav{position:sticky;top:0;z-index:100;background:rgba(3,7,18,0.85);backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,0.06);padding:0.75rem 1.5rem;display:flex;align-items:center;justify-content:space-between}
+        .tool-nav a{display:flex;align-items:center;gap:0.75rem;color:#94a3b8;transition:color 0.2s;text-decoration:none}
+        .tool-nav a:hover{color:#fff}
+        .back-btn{width:36px;height:36px;border-radius:10px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:center;transition:all 0.3s}
+        .back-btn:hover{border-color:rgba(139,92,246,0.4)}
+        .tool-brand{display:flex;align-items:center;gap:0.5rem}
+        .tool-brand-icon{width:36px;height:36px;border-radius:10px;background:#f9731615;border:1px solid #f9731630;display:flex;align-items:center;justify-content:center;color:#f97316;font-size:1rem}
+        .tool-brand h1{font-family:'Orbitron',sans-serif;font-size:1rem;font-weight:800;letter-spacing:0.1em;color:#fff}
+        .tool-brand h1 span{color:#f97316}
+        .nav-actions{display:flex;align-items:center;gap:0.5rem}
+        .theme-toggle-btn{width:36px;height:36px;border-radius:10px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);color:#94a3b8;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:1rem;transition:all 0.3s}
+        .theme-toggle-btn:hover{background:rgba(139,92,246,0.15);border-color:rgba(139,92,246,0.3);color:#fff}
+
+        /* Main */
+        .tool-main{max-width:1280px;margin:0 auto;padding:2rem 1.5rem 4rem}
+        .tool-header{text-align:center;margin-bottom:2.5rem}
+        .tool-header h2{font-family:'Orbitron',sans-serif;font-size:clamp(1.4rem,3vw,2rem);font-weight:800;margin-bottom:0.5rem;color:#fff}
+        .tool-header p{font-family:'Rajdhani',sans-serif;color:#64748b;font-size:1rem}
+
+        /* Card */
+        .tool-card{background:rgba(15,23,42,0.6);border:1px solid rgba(255,255,255,0.06);border-radius:1.25rem;backdrop-filter:blur(16px);overflow:hidden}
+        .tool-card-header{padding:0.75rem 1.25rem;background:rgba(0,0,0,0.3);border-bottom:1px solid rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:space-between}
+        .tool-card-header span{font-family:'Orbitron',sans-serif;font-size:0.65rem;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;color:#f97316}
+        .tool-card-body{padding:1.5rem}
+
+        /* Inputs */
+        .stx-input,.stx-textarea,.stx-select{width:100%;padding:0.75rem 1rem;background:rgba(0,0,0,0.3);border:1px solid rgba(255,255,255,0.08);border-radius:0.75rem;color:#e2e8f0;font-family:'JetBrains Mono',monospace;font-size:0.85rem;outline:none;transition:border-color 0.3s}
+        .stx-input:focus,.stx-textarea:focus,.stx-select:focus{border-color:#f9731660}
+        .stx-textarea{resize:vertical;min-height:200px;line-height:1.7}
+        .stx-select{cursor:pointer;-webkit-appearance:none}
+        .stx-select option{background:#0f172a;color:#e2e8f0}
+        .stx-label{display:block;font-family:'Rajdhani',sans-serif;font-weight:600;font-size:0.85rem;color:#94a3b8;margin-bottom:0.4rem;letter-spacing:0.05em}
+
+        /* Buttons */
+        .stx-btn{display:inline-flex;align-items:center;gap:0.5rem;padding:0.65rem 1.5rem;border:none;border-radius:0.75rem;font-family:'Orbitron',sans-serif;font-weight:700;font-size:0.7rem;letter-spacing:0.1em;cursor:pointer;transition:all 0.3s;text-transform:uppercase}
+        .stx-btn-primary{background:linear-gradient(135deg,#f97316,#f97316cc);color:#fff}
+        .stx-btn-primary:hover{box-shadow:0 0 30px #f9731640;transform:translateY(-1px)}
+        .stx-btn-secondary{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);color:#94a3b8}
+        .stx-btn-secondary:hover{background:rgba(255,255,255,0.1);color:#fff}
+        .stx-btn-sm{padding:0.45rem 1rem;font-size:0.6rem}
+
+        /* Grid */
+        .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem}
+        .flex-row{display:flex;gap:0.75rem;flex-wrap:wrap;align-items:center}
+        .flex-col{display:flex;flex-direction:column;gap:0.75rem}
+        .mt-1{margin-top:0.5rem}.mt-2{margin-top:1rem}.mt-3{margin-top:1.5rem}
+        .mb-1{margin-bottom:0.5rem}.mb-2{margin-bottom:1rem}
+
+        /* Output */
+        .output-box{background:rgba(0,0,0,0.4);border:1px solid rgba(255,255,255,0.06);border-radius:0.75rem;padding:1rem;font-family:'JetBrains Mono',monospace;font-size:0.8rem;color:#a5b4fc;line-height:1.8;min-height:200px;max-height:500px;overflow-y:auto;white-space:pre-wrap;word-break:break-all}
+
+        /* Toast */
+        .toast{position:fixed;bottom:2rem;right:2rem;background:rgba(15,23,42,0.95);border:1px solid #f9731640;color:#fff;padding:0.75rem 1.5rem;border-radius:0.75rem;font-family:'Rajdhani',sans-serif;font-size:0.9rem;z-index:9999;transform:translateY(100px);opacity:0;transition:all 0.4s;pointer-events:none}
+        .toast.show{transform:translateY(0);opacity:1}
+
+        /* Responsive */
+        @media(max-width:768px){.grid-2{grid-template-columns:1fr}.tool-main{padding:1.5rem 1rem 3rem}}
+
+        /* ========== LIGHT MODE OVERRIDES ========== */
+        .light-mode body{background:#f8fafc !important;color:#0f172a !important}
+
+        /* Nav */
+        .light-mode .tool-nav{background:rgba(248,250,252,0.92) !important;border-color:rgba(0,0,0,0.06) !important}
+        .light-mode .tool-nav a{color:#475569 !important}
+        .light-mode .tool-nav a:hover{color:#0f172a !important}
+        .light-mode .back-btn{background:rgba(0,0,0,0.04) !important;border-color:rgba(0,0,0,0.1) !important}
+        .light-mode .tool-brand h1{color:#0f172a !important}
+
+        /* Theme toggle */
+        .light-mode .theme-toggle-btn{background:rgba(0,0,0,0.04) !important;border-color:rgba(0,0,0,0.1) !important;color:#f59e0b !important}
+        .light-mode .theme-toggle-btn:hover{background:rgba(245,158,11,0.12) !important;border-color:rgba(245,158,11,0.3) !important}
+
+        /* Header */
+        .light-mode .tool-header h2{color:#0f172a !important}
+        .light-mode .tool-header p{color:#64748b !important}
+
+        /* Cards */
+        .light-mode .tool-card{background:rgba(255,255,255,0.85) !important;border-color:rgba(0,0,0,0.08) !important}
+        .light-mode .tool-card-header{background:rgba(0,0,0,0.02) !important;border-color:rgba(0,0,0,0.06) !important}
+        .light-mode .tool-card-body{color:#0f172a !important}
+
+        /* Inputs */
+        .light-mode .stx-input,.light-mode .stx-textarea,.light-mode .stx-select{background:#fff !important;border-color:#d1d5db !important;color:#0f172a !important}
+        .light-mode .stx-input::placeholder,.light-mode .stx-textarea::placeholder{color:#9ca3af !important}
+        .light-mode .stx-select option{background:#fff !important;color:#0f172a !important}
+        .light-mode .stx-label{color:#374151 !important}
+
+        /* Buttons */
+        .light-mode .stx-btn-secondary{background:rgba(0,0,0,0.04) !important;border-color:rgba(0,0,0,0.12) !important;color:#374151 !important}
+        .light-mode .stx-btn-secondary:hover{background:rgba(0,0,0,0.08) !important;color:#0f172a !important}
+
+        /* Output box */
+        .light-mode .output-box{background:rgba(241,245,249,0.9) !important;border-color:rgba(0,0,0,0.08) !important;color:#1e293b !important}
+
+        /* Toast */
+        .light-mode .toast{background:rgba(255,255,255,0.95) !important;border-color:rgba(0,0,0,0.1) !important;color:#0f172a !important}
+
+        /* All text elements */
+        .light-mode h1,.light-mode h2,.light-mode h3,.light-mode h4{color:#0f172a !important}
+        .light-mode p,.light-mode span,.light-mode div,.light-mode label{color:inherit}
+        .light-mode label{color:#374151 !important}
+
+        /* Checkbox labels */
+        .light-mode label:has(input[type="checkbox"]){color:#334155 !important}
+
+        /* Inline style color overrides for output boxes with custom colors */
+        .light-mode [style*="color:#fff"]{color:#0f172a !important}
+        .light-mode [style*="color: #fff"]{color:#0f172a !important}
+        .light-mode [style*="color:#e2e8f0"]{color:#1e293b !important}
+        .light-mode [style*="color: #e2e8f0"]{color:#1e293b !important}
+        .light-mode [style*="color:#94a3b8"]{color:#64748b !important}
+        .light-mode [style*="color: #94a3b8"]{color:#64748b !important}
+        .light-mode [style*="color:#64748b"]{color:#475569 !important}
+
+        /* Keep accent colors vivid in light mode */
+        .light-mode [style*="color:#4ade80"]{color:#16a34a !important}
+        .light-mode [style*="color:#f87171"]{color:#dc2626 !important}
+        .light-mode [style*="color:#a5b4fc"]{color:#4338ca !important}
+    </style>
+</head>
+<body>
+    <nav class="tool-nav">
+        <a href="../index.html">
+            <div class="back-btn"><i class="fas fa-chevron-left" style="font-size:0.75rem"></i></div>
+            <span class="font-orbitron" style="font-weight:700;font-size:0.75rem;letter-spacing:0.1em">BACK</span>
+        </a>
+        <div class="tool-brand">
+            <div class="tool-brand-icon"><i class="fas fa-clock"></i></div>
+            <h1>TIMESTAMP <span>CONVERTER</span></h1>
+        </div>
+        <div class="nav-actions">
+            <div id="shadow-auth-ui"></div>
+            <button onclick="toggleTheme()" class="theme-toggle-btn" title="Toggle Theme"><i id="theme-icon" class="fas fa-moon"></i></button>
+        </div>
+    </nav>
+    <main class="tool-main">
+        <div class="tool-header">
+            <h2>Timestamp Converter</h2>
+            <p>Privacy-first • Client-side • Zero data collection</p>
+        </div>
+        <div class="grid-2"><div class="flex-col"><label class="stx-label">Unix Timestamp</label><input id="ts" class="stx-input" placeholder="1714000000" oninput="tsToDate()"><button class="stx-btn stx-btn-primary mt-1" onclick="now()"><i class="fas fa-clock"></i> Current Time</button><div id="out1" class="output-box mt-1" style="min-height:100px"></div></div><div class="flex-col"><label class="stx-label">Date String</label><input id="ds" class="stx-input" type="datetime-local" oninput="dateToTs()"><div id="out2" class="output-box mt-2" style="min-height:100px"></div></div></div>
+    </main>
+    <div class="toast" id="toast"></div>
+    <script>
+    function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500)}
+    function copyText(text){navigator.clipboard.writeText(text).then(()=>showToast('Copied to clipboard!'))}
+    function copyEl(id){const el=document.getElementById(id);copyText(el.value||el.textContent)}
+    function tsToDate(){const v=document.getElementById('ts').value.trim();if(!v)return;let ms=v.length<=10?v*1000:+v;const d=new Date(ms);document.getElementById('out1').textContent='UTC: '+d.toUTCString()+'\nLocal: '+d.toLocaleString()+'\nISO: '+d.toISOString()+'\nRelative: '+timeAgo(d)}
+function dateToTs(){const v=document.getElementById('ds').value;const d=new Date(v);document.getElementById('out2').textContent='Seconds: '+Math.floor(d.getTime()/1000)+'\nMilliseconds: '+d.getTime()+'\nISO: '+d.toISOString()}
+function now(){const n=Math.floor(Date.now()/1000);document.getElementById('ts').value=n;tsToDate()}
+function timeAgo(d){const s=Math.floor((Date.now()-d)/1000);if(s<60)return s+'s ago';if(s<3600)return Math.floor(s/60)+'m ago';if(s<86400)return Math.floor(s/3600)+'h ago';return Math.floor(s/86400)+'d ago'}
+    </script>
+</body>
+</html>
