@@ -490,6 +490,7 @@
         }
         @media (max-width: 768px) {
             .nav-links { display: none; }
+            .nav-app-name { display: none; }
             .mobile-toggle { display: block; }
             .hero-stats { grid-template-columns: repeat(2, 1fr); }
             .features-grid { grid-template-columns: 1fr; }
@@ -1011,7 +1012,7 @@
                 <div class="nav-logo">
                     <i class="fas fa-ghost"></i>
                 </div>
-                <div>
+                <div class="nav-app-name">
                     <div class="nav-title">SHADOW<span>TOOLS</span></div>
                     <div class="nav-subtitle">PRIVACY ARCHITECTS</div>
                 </div>
@@ -1024,7 +1025,6 @@
             </div>
 
             <div class="nav-actions">
-                <div id="shadow-auth-ui"></div>
                 <button class="hub-theme-toggle" onclick="toggleTheme()" title="Toggle Theme">
                     <i id="theme-icon" class="fas fa-moon"></i>
                 </button>
