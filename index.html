@@ -6,7 +6,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ShadowTools — The Ultimate Privacy-First Toolkit</title>
     <meta name="description"
-        content="ShadowTools: 150+ free browser-based tools for PDF, Image, Video, Audio, and Text. All processing happens locally. Your data never leaves your device.">
+        content="ShadowTools: 180+ free browser-based tools for PDF, Image, Video, Audio, and Text. All processing happens locally. Your data never leaves your device.">
+
+    <!-- PWA Meta Tags -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#8b5cf6">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="ShadowTools">
+    <link rel="apple-touch-icon" href="icons/icon-512.png">
+    <meta name="msapplication-TileColor" content="#030712">
+    <meta name="msapplication-TileImage" content="icons/icon-192.png">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="application-name" content="ShadowTools">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -665,10 +677,329 @@
         .light-mode .auth-modal-overlay {
             background: rgba(241,245,249,0.85);
         }
+
+        /* ===== PWA INSTALL BANNER ===== */
+        .pwa-install-banner {
+            position: fixed;
+            bottom: -100%;
+            left: 50%; transform: translateX(-50%);
+            z-index: 9999;
+            width: calc(100% - 2rem); max-width: 520px;
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(24px) saturate(180%);
+            -webkit-backdrop-filter: blur(24px) saturate(180%);
+            border: 1px solid rgba(139, 92, 246, 0.25);
+            border-radius: 1.5rem;
+            padding: 1.75rem;
+            box-shadow:
+                0 -10px 60px rgba(0, 0, 0, 0.5),
+                0 0 80px rgba(139, 92, 246, 0.12),
+                inset 0 1px 0 rgba(255, 255, 255, 0.06);
+            transition: bottom 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+            overflow: hidden;
+        }
+        .pwa-install-banner.show {
+            bottom: 1.5rem;
+        }
+        .pwa-install-banner::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #8b5cf6, #06b6d4, #ec4899, #8b5cf6);
+            background-size: 300% 100%;
+            animation: bannerGradient 4s linear infinite;
+        }
+        @keyframes bannerGradient {
+            0% { background-position: 0% 50%; }
+            100% { background-position: 300% 50%; }
+        }
+        .pwa-install-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        .pwa-install-icon {
+            width: 56px; height: 56px;
+            border-radius: 16px;
+            background: linear-gradient(135deg, #8b5cf6, #6366f1);
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 0 30px rgba(139, 92, 246, 0.4);
+            flex-shrink: 0;
+            position: relative;
+            overflow: hidden;
+        }
+        .pwa-install-icon::after {
+            content: '';
+            position: absolute; inset: 0;
+            background: linear-gradient(135deg, transparent, rgba(255,255,255,0.2));
+        }
+        .pwa-install-icon img {
+            width: 36px; height: 36px;
+            border-radius: 8px;
+            position: relative; z-index: 1;
+        }
+        .pwa-install-icon i {
+            color: #fff; font-size: 1.4rem;
+            position: relative; z-index: 1;
+        }
+        .pwa-install-title {
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 800;
+            font-size: 1.05rem;
+            color: #fff;
+            letter-spacing: 0.05em;
+            line-height: 1.3;
+        }
+        .pwa-install-subtitle {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.65rem;
+            color: #8b5cf6;
+            letter-spacing: 0.15em;
+            margin-top: 2px;
+        }
+        .pwa-install-features {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.5rem;
+            margin-bottom: 1.25rem;
+        }
+        .pwa-feature-chip {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            padding: 0.6rem 0.4rem;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            text-align: center;
+        }
+        .pwa-feature-chip i {
+            font-size: 1rem;
+            color: #8b5cf6;
+        }
+        .pwa-feature-chip span {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 0.65rem;
+            color: #94a3b8;
+            font-weight: 600;
+            line-height: 1.2;
+        }
+        .pwa-install-actions {
+            display: flex;
+            gap: 0.75rem;
+        }
+        .pwa-install-btn {
+            flex: 1;
+            padding: 14px 20px;
+            border: none;
+            border-radius: 14px;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+            font-size: 0.75rem;
+            letter-spacing: 0.1em;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .pwa-install-btn.primary {
+            background: linear-gradient(135deg, #8b5cf6, #6366f1);
+            color: #fff;
+            box-shadow: 0 4px 20px rgba(139, 92, 246, 0.35);
+        }
+        .pwa-install-btn.primary:hover {
+            box-shadow: 0 6px 30px rgba(139, 92, 246, 0.55);
+            transform: translateY(-2px);
+        }
+        .pwa-install-btn.primary:active {
+            transform: translateY(0);
+        }
+        .pwa-install-btn.secondary {
+            background: rgba(255, 255, 255, 0.06);
+            color: #94a3b8;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .pwa-install-btn.secondary:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+        }
+        .pwa-install-dismiss {
+            position: absolute;
+            top: 0.75rem; right: 0.75rem;
+            background: none; border: none;
+            color: #475569; font-size: 1.1rem;
+            cursor: pointer; padding: 4px;
+            transition: color 0.2s;
+            line-height: 1;
+        }
+        .pwa-install-dismiss:hover { color: #ef4444; }
+
+        /* Pulse ring around icon */
+        .pwa-install-icon .pulse-ring {
+            position: absolute;
+            inset: -4px;
+            border: 2px solid rgba(139, 92, 246, 0.4);
+            border-radius: 20px;
+            animation: installPulse 2s ease-out infinite;
+        }
+        @keyframes installPulse {
+            0% { transform: scale(1); opacity: 0.6; }
+            100% { transform: scale(1.4); opacity: 0; }
+        }
+
+        /* ===== SPLASH SCREEN ===== */
+        .pwa-splash {
+            position: fixed;
+            inset: 0;
+            z-index: 99999;
+            background: #030712;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 1.5rem;
+            transition: opacity 0.5s ease, visibility 0.5s ease;
+        }
+        .pwa-splash.hidden {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+        .pwa-splash-logo {
+            width: 80px; height: 80px;
+            border-radius: 24px;
+            background: linear-gradient(135deg, #8b5cf6, #6366f1);
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 0 60px rgba(139, 92, 246, 0.4);
+            animation: splashPulse 1.5s ease-in-out infinite alternate;
+        }
+        @keyframes splashPulse {
+            from { box-shadow: 0 0 40px rgba(139, 92, 246, 0.3); transform: scale(0.95); }
+            to { box-shadow: 0 0 80px rgba(139, 92, 246, 0.5); transform: scale(1.05); }
+        }
+        .pwa-splash-logo img {
+            width: 50px; height: 50px;
+            border-radius: 12px;
+        }
+        .pwa-splash-logo i {
+            color: #fff; font-size: 2rem;
+        }
+        .pwa-splash-name {
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 900;
+            font-size: 1.6rem;
+            letter-spacing: 0.15em;
+            color: #fff;
+        }
+        .pwa-splash-name span { color: #8b5cf6; }
+        .pwa-splash-bar {
+            width: 200px; height: 3px;
+            background: rgba(255, 255, 255, 0.06);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        .pwa-splash-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #8b5cf6, #06b6d4);
+            border-radius: 4px;
+            animation: splashLoad 1.8s ease-in-out forwards;
+        }
+        @keyframes splashLoad {
+            0% { width: 0; }
+            40% { width: 45%; }
+            70% { width: 75%; }
+            100% { width: 100%; }
+        }
+
+        /* Light mode banner */
+        .light-mode .pwa-install-banner {
+            background: rgba(255, 255, 255, 0.95);
+            border-color: rgba(124, 58, 237, 0.2);
+            box-shadow: 0 -10px 60px rgba(0, 0, 0, 0.12), 0 0 40px rgba(124, 58, 237, 0.06);
+        }
+        .light-mode .pwa-install-title { color: #0f172a; }
+        .light-mode .pwa-feature-chip {
+            background: rgba(0, 0, 0, 0.03);
+            border-color: rgba(0, 0, 0, 0.06);
+        }
+        .light-mode .pwa-feature-chip span { color: #475569; }
+        .light-mode .pwa-install-btn.secondary {
+            background: rgba(0, 0, 0, 0.04);
+            border-color: rgba(0, 0, 0, 0.1);
+            color: #64748b;
+        }
+        .light-mode .pwa-install-btn.secondary:hover {
+            background: rgba(0, 0, 0, 0.08);
+            color: #0f172a;
+        }
+
+        @media (max-width: 480px) {
+            .pwa-install-banner {
+                width: calc(100% - 1rem);
+                padding: 1.25rem;
+                border-radius: 1.25rem 1.25rem 0 0;
+            }
+            .pwa-install-banner.show { bottom: 0; }
+            .pwa-install-features { grid-template-columns: repeat(3, 1fr); }
+            .pwa-install-actions { flex-direction: column; }
+        }
     </style>
 </head>
 
 <body>
+    <!-- ===== SPLASH SCREEN (shown on first visit) ===== -->
+    <div class="pwa-splash" id="pwa-splash">
+        <div class="pwa-splash-logo">
+            <i class="fas fa-ghost"></i>
+        </div>
+        <div class="pwa-splash-name">SHADOW<span>TOOLS</span></div>
+        <div class="pwa-splash-bar">
+            <div class="pwa-splash-bar-fill"></div>
+        </div>
+    </div>
+
+    <!-- ===== PWA INSTALL BANNER ===== -->
+    <div class="pwa-install-banner" id="pwa-install-banner">
+        <button class="pwa-install-dismiss" id="pwa-dismiss" aria-label="Close">&times;</button>
+        <div class="pwa-install-header">
+            <div class="pwa-install-icon">
+                <div class="pulse-ring"></div>
+                <i class="fas fa-ghost"></i>
+            </div>
+            <div>
+                <div class="pwa-install-title">Install ShadowTools</div>
+                <div class="pwa-install-subtitle">>> ADD TO HOME SCREEN</div>
+            </div>
+        </div>
+        <div class="pwa-install-features">
+            <div class="pwa-feature-chip">
+                <i class="fas fa-bolt"></i>
+                <span>Works Offline</span>
+            </div>
+            <div class="pwa-feature-chip">
+                <i class="fas fa-toolbox"></i>
+                <span>180+ Tools</span>
+            </div>
+            <div class="pwa-feature-chip">
+                <i class="fas fa-eye-slash"></i>
+                <span>No Tracking</span>
+            </div>
+        </div>
+        <div class="pwa-install-actions">
+            <button class="pwa-install-btn primary" id="pwa-install-accept">
+                <i class="fas fa-download"></i> INSTALL APP
+            </button>
+            <button class="pwa-install-btn secondary" id="pwa-install-later">
+                NOT NOW
+            </button>
+        </div>
+    </div>
+
     <!-- 3D Particle Background -->
     <canvas id="bg-canvas"></canvas>
     <div class="bg-gradient-overlay"></div>
@@ -1201,6 +1532,133 @@
         document.addEventListener('DOMContentLoaded', () => {
             updateNavAuth();
         });
+
+        // =============================================
+        //  PWA INSTALL SYSTEM — Premium Experience
+        // =============================================
+        (function() {
+            // --- Splash Screen ---
+            const splash = document.getElementById('pwa-splash');
+            if (splash) {
+                // Only show splash on first visit per session
+                if (sessionStorage.getItem('shadow-splash-shown')) {
+                    splash.classList.add('hidden');
+                } else {
+                    sessionStorage.setItem('shadow-splash-shown', '1');
+                    setTimeout(() => splash.classList.add('hidden'), 2200);
+                }
+            }
+
+            // --- Service Worker Registration ---
+            if ('serviceWorker' in navigator) {
+                window.addEventListener('load', async () => {
+                    try {
+                        const reg = await navigator.serviceWorker.register('./sw.js');
+                        console.log('[PWA] SW registered:', reg.scope);
+
+                        // Check for updates periodically
+                        setInterval(() => reg.update(), 60 * 60 * 1000); // every hour
+                    } catch (err) {
+                        console.warn('[PWA] SW registration failed:', err);
+                    }
+                });
+            }
+
+            // --- Install Prompt Capture ---
+            let deferredPrompt = null;
+            const banner = document.getElementById('pwa-install-banner');
+            const acceptBtn = document.getElementById('pwa-install-accept');
+            const laterBtn = document.getElementById('pwa-install-later');
+            const dismissBtn = document.getElementById('pwa-dismiss');
+            const DISMISS_KEY = 'shadow-pwa-dismissed';
+            const DISMISS_DAYS = 3;
+
+            function wasDismissedRecently() {
+                const dismissed = localStorage.getItem(DISMISS_KEY);
+                if (!dismissed) return false;
+                const elapsed = Date.now() - parseInt(dismissed, 10);
+                return elapsed < DISMISS_DAYS * 24 * 60 * 60 * 1000;
+            }
+
+            function showBanner() {
+                if (banner && !wasDismissedRecently()) {
+                    setTimeout(() => banner.classList.add('show'), 5000);
+                }
+            }
+
+            function hideBanner() {
+                if (banner) banner.classList.remove('show');
+            }
+
+            // Capture the beforeinstallprompt event
+            window.addEventListener('beforeinstallprompt', (e) => {
+                e.preventDefault();
+                deferredPrompt = e;
+                console.log('[PWA] Install prompt captured');
+                showBanner();
+            });
+
+            // Install button
+            if (acceptBtn) {
+                acceptBtn.addEventListener('click', async () => {
+                    if (!deferredPrompt) {
+                        // Fallback: show instructions
+                        alert('To install: Use your browser\'s menu → "Add to Home Screen" or "Install App"');
+                        hideBanner();
+                        return;
+                    }
+                    deferredPrompt.prompt();
+                    const { outcome } = await deferredPrompt.userChoice;
+                    console.log('[PWA] Install outcome:', outcome);
+                    deferredPrompt = null;
+                    hideBanner();
+                });
+            }
+
+            // Later / dismiss
+            if (laterBtn) {
+                laterBtn.addEventListener('click', () => {
+                    localStorage.setItem(DISMISS_KEY, Date.now().toString());
+                    hideBanner();
+                });
+            }
+            if (dismissBtn) {
+                dismissBtn.addEventListener('click', () => {
+                    localStorage.setItem(DISMISS_KEY, Date.now().toString());
+                    hideBanner();
+                });
+            }
+
+            // Detect successful install
+            window.addEventListener('appinstalled', () => {
+                console.log('[PWA] App installed successfully!');
+                hideBanner();
+                deferredPrompt = null;
+            });
+
+            // Detect if already installed (standalone mode)
+            if (window.matchMedia('(display-mode: standalone)').matches ||
+                window.navigator.standalone === true) {
+                console.log('[PWA] Running as installed app');
+                // Hide install-related UI
+                if (banner) banner.remove();
+            }
+
+            // iOS install detection (no beforeinstallprompt on iOS)
+            const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+            const isInStandaloneMode = window.navigator.standalone === true;
+            if (isIOS && !isInStandaloneMode && !wasDismissedRecently()) {
+                // Show banner with iOS-specific instructions
+                if (acceptBtn) {
+                    acceptBtn.innerHTML = '<i class="fas fa-share-from-square"></i> TAP SHARE → ADD';
+                    acceptBtn.addEventListener('click', () => {
+                        alert('To install on iOS:\n\n1. Tap the Share button (📤) at the bottom of Safari\n2. Scroll down and tap "Add to Home Screen"\n3. Tap "Add" to confirm');
+                        hideBanner();
+                    }, { once: true });
+                }
+                setTimeout(() => { if (banner) banner.classList.add('show'); }, 5000);
+            }
+        })();
     </script>
 </body>
 
