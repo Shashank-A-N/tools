@@ -1,20 +1,97 @@
 {
-  "name": "PDF & Image Toolkit",
-  "short_name": "PDFToolkit",
-  "description": "AI-Powered PDF & Image Tools — 40+ tools",
-  "start_url": "index.html",
-  "scope": ".",
+  "name": "ShadowTools",
+  "short_name": "ShadowTools",
+  "description": "180+ AI-powered tools for PDF, Image, Video, Audio, Text & Developer workflows. All processing happens locally — your data never leaves your device.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "id": "shadowtools-pwa",
   "display": "standalone",
-  "orientation": "portrait-primary",
-  "background_color": "#0f172a",
-  "theme_color": "#6d28d9",
+  "display_override": ["window-controls-overlay", "standalone", "minimal-ui"],
+  "orientation": "any",
+  "background_color": "#030712",
+  "theme_color": "#8b5cf6",
   "lang": "en-US",
+  "dir": "ltr",
+  "categories": ["productivity", "utilities", "developer", "security"],
+  "prefer_related_applications": false,
   "icons": [
     {
       "src": "icons/icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
     }
-  ]
+  ],
+  "screenshots": [
+    {
+      "src": "icons/screenshot-desktop.png",
+      "sizes": "1024x1024",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "ShadowTools Dashboard — Access 180+ tools from one place"
+    },
+    {
+      "src": "icons/screenshot-mobile.png",
+      "sizes": "1024x1024",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "ShadowTools on Mobile — Full power in your pocket"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "PDF Tools",
+      "short_name": "PDF",
+      "description": "40+ PDF processing tools — merge, split, compress, edit",
+      "url": "./pdf tools/index.html",
+      "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Image Tools",
+      "short_name": "Image",
+      "description": "24+ image tools — resize, convert, enhance with AI",
+      "url": "./image tools/index.html",
+      "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Video Tools",
+      "short_name": "Video",
+      "description": "40+ video tools — trim, crop, filters, screen recorder",
+      "url": "./video tools/index.html",
+      "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Audio Tools",
+      "short_name": "Audio",
+      "description": "52+ audio tools — equalizer, effects, generators",
+      "url": "./audio tools/index.html",
+      "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }]
+    }
+  ],
+  "related_applications": [],
+  "handle_links": "preferred",
+  "launch_handler": {
+    "client_mode": "navigate-existing"
+  },
+  "edge_side_panel": {
+    "preferred_width": 480
+  }
 }
