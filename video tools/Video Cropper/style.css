@@ -1,0 +1,584 @@
+/* 
+ * Video Cropper - Advanced Cyberpunk/Glassmorphism Theme
+ * 
+ * Extensive CSS Variables for easy theming.
+ * Complex animations and interactive states.
+ */
+
+:root {
+    /* Colors */
+    --primary: #8b5cf6;
+    --primary-hover: #7c3aed;
+    --primary-glow: rgba(139, 92, 246, 0.5);
+    --bg-dark: #0f172a;
+    --bg-panel: rgba(30, 41, 59, 0.7);
+    --text-main: #f8fafc;
+    --text-muted: #94a3b8;
+    --border: rgba(255, 255, 255, 0.1);
+
+    /* Spacing */
+    --spacing-xs: 0.25rem;
+    --spacing-sm: 0.5rem;
+    --spacing-md: 1rem;
+    --spacing-lg: 1.5rem;
+    --spacing-xl: 2rem;
+
+    /* Effects */
+    --glass-bg: rgba(15, 23, 42, 0.6);
+    --glass-border: 1px solid rgba(255, 255, 255, 0.08);
+    --blur: blur(12px);
+    --shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    --shadow-neon: 0 0 10px var(--primary-glow), 0 0 20px rgba(139, 92, 246, 0.2);
+
+    /* Transitions */
+    --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+    --trans-fast: 0.2s var(--ease-out);
+    --trans-med: 0.4s var(--ease-out);
+}
+
+/* Base Reset & Typography */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Rajdhani', sans-serif;
+    background-color: var(--bg-dark);
+    color: var(--text-main);
+    overflow: hidden;
+    /* App-like feel */
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Background Animation */
+#bg-3d-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    background: radial-gradient(circle at 50% 50%, #1e1b4b 0%, #020617 100%);
+}
+
+/* Layout Grid */
+.app-container {
+    display: grid;
+    grid-template-columns: 320px 1fr 320px;
+    grid-template-rows: auto 1fr auto;
+    height: 100vh;
+    gap: var(--spacing-md);
+    padding: var(--spacing-md);
+    transition: all 0.5s ease;
+}
+
+/* Panels */
+.panel {
+    background: var(--bg-panel);
+    backdrop-filter: var(--blur);
+    border: var(--glass-border);
+    border-radius: 1rem;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.panel:hover {
+    box-shadow: var(--shadow-lg);
+    border-color: rgba(255, 255, 255, 0.15);
+}
+
+/* Left Sidebar (Tools) */
+.sidebar-left {
+    grid-column: 1;
+    grid-row: 2;
+    padding: var(--spacing-md);
+    gap: var(--spacing-lg);
+    overflow-y: auto;
+}
+
+/* Center Stage (Canvas) */
+.stage {
+    grid-column: 2;
+    grid-row: 2;
+    position: relative;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.5);
+}
+
+/* Right Sidebar (Properties/Filters) */
+.sidebar-right {
+    grid-column: 3;
+    grid-row: 2;
+    padding: var(--spacing-md);
+    overflow-y: auto;
+}
+
+/* Navbar */
+.navbar {
+    grid-column: 1 / -1;
+    grid-row: 1;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 var(--spacing-lg);
+    background: var(--glass-bg);
+    border-radius: 0.75rem;
+    border: var(--glass-border);
+    backdrop-filter: var(--blur);
+    z-index: 100;
+    /* Ensure on top */
+}
+
+/* Footer (Timeline/Status) */
+.footer {
+    grid-column: 1 / -1;
+    grid-row: 3;
+    height: 80px;
+    /* Or expand for timeline */
+    background: var(--glass-bg);
+    border-radius: 0.75rem;
+    border: var(--glass-border);
+    backdrop-filter: var(--blur);
+    display: flex;
+    align-items: center;
+    padding: 0 var(--spacing-lg);
+    gap: var(--spacing-lg);
+}
+
+/* Components: Buttons */
+.btn {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: var(--text-main);
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.8rem;
+    letter-spacing: 1px;
+    transition: all var(--trans-fast);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-sm);
+}
+
+.btn-primary {
+    background: var(--primary);
+    border-color: var(--primary);
+    box-shadow: var(--shadow-neon);
+}
+
+.btn-primary:hover {
+    background: var(--primary-hover);
+    box-shadow: 0 0 15px var(--primary-glow);
+}
+
+.btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* Components: Inputs */
+.input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    margin-bottom: 1rem;
+}
+
+.label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+.input,
+.select {
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: white;
+    padding: 0.5rem;
+    border-radius: 0.25rem;
+    font-family: inherit;
+    transition: border-color 0.2s;
+}
+
+.input:focus,
+.select:focus {
+    outline: none;
+    border-color: var(--primary);
+}
+
+/* Components: Sliders */
+.slider-container {
+    padding: 0.5rem 0;
+}
+
+input[type=range] {
+    -webkit-appearance: none;
+    width: 100%;
+    background: transparent;
+}
+
+input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    height: 16px;
+    width: 16px;
+    border-radius: 50%;
+    background: var(--primary);
+    cursor: pointer;
+    margin-top: -6px;
+    box-shadow: 0 0 10px rgba(139, 92, 246, 0.5);
+    transition: transform 0.1s;
+}
+
+input[type=range]::-webkit-slider-thumb:hover {
+    transform: scale(1.2);
+}
+
+input[type=range]::-webkit-slider-runnable-track {
+    width: 100%;
+    height: 4px;
+    cursor: pointer;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 2px;
+}
+
+/* Crop Overlay */
+#crop-overlay {
+    position: absolute;
+    border: 2px solid var(--primary);
+    box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.7);
+    pointer-events: auto;
+    /* Enable interaction */
+    cursor: move;
+    z-index: 10;
+}
+
+.crop-handle {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    background: white;
+    border: 1px solid var(--primary);
+    z-index: 11;
+}
+
+.handle-nw {
+    top: -5px;
+    left: -5px;
+    cursor: nw-resize;
+}
+
+.handle-ne {
+    top: -5px;
+    right: -5px;
+    cursor: ne-resize;
+}
+
+.handle-sw {
+    bottom: -5px;
+    left: -5px;
+    cursor: sw-resize;
+}
+
+.handle-se {
+    bottom: -5px;
+    right: -5px;
+    cursor: se-resize;
+}
+
+.handle-n {
+    top: -5px;
+    left: 50%;
+    transform: translateX(-50%);
+    cursor: n-resize;
+}
+
+.handle-s {
+    bottom: -5px;
+    left: 50%;
+    transform: translateX(-50%);
+    cursor: s-resize;
+}
+
+.handle-w {
+    left: -5px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: w-resize;
+}
+
+.handle-e {
+    right: -5px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: e-resize;
+}
+
+/* Grid overlay inside crop box */
+.grid-lines {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+    opacity: 0.5;
+}
+
+.grid-line-x-1 {
+    position: absolute;
+    left: 33.33%;
+    top: 0;
+    bottom: 0;
+    border-left: 1px dashed rgba(255, 255, 255, 0.5);
+}
+
+.grid-line-x-2 {
+    position: absolute;
+    left: 66.66%;
+    top: 0;
+    bottom: 0;
+    border-left: 1px dashed rgba(255, 255, 255, 0.5);
+}
+
+.grid-line-y-1 {
+    position: absolute;
+    top: 33.33%;
+    left: 0;
+    right: 0;
+    border-top: 1px dashed rgba(255, 255, 255, 0.5);
+}
+
+.grid-line-y-2 {
+    position: absolute;
+    top: 66.66%;
+    left: 0;
+    right: 0;
+    border-top: 1px dashed rgba(255, 255, 255, 0.5);
+}
+
+/* Utility Classes */
+.hidden {
+    display: none !important;
+}
+
+.flex-center {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.text-gradient {
+    background: linear-gradient(135deg, #c084fc 0%, #6366f1 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* Animations */
+@keyframes pulse-ring {
+    0% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(139, 92, 246, 0.7);
+    }
+
+    70% {
+        transform: scale(1);
+        box-shadow: 0 0 0 10px rgba(139, 92, 246, 0);
+    }
+
+    100% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(139, 92, 246, 0);
+    }
+}
+
+.recording-indicator {
+    width: 12px;
+    height: 12px;
+    background: #ef4444;
+    border-radius: 50%;
+    box-shadow: 0 0 10px #ef4444;
+    animation: pulse-ring 2s infinite;
+    display: none;
+}
+
+.recording-indicator.active {
+    display: block;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+    width: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.1);
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+/* 
+ * ==========================================================================
+ * RESPONSIVE DESIGN - "EFFICIENT UTILIZATION"
+ * ==========================================================================
+ */
+
+/* Intermediate / Tablet (Stack sides, keep stage prominent) */
+@media (max-width: 1024px) {
+    .app-container {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto 50vh 1fr 1fr auto;
+        /* Navbar, Stage, Controls, Filters, Footer */
+        height: auto;
+        overflow-y: auto;
+    }
+
+    .navbar {
+        grid-column: 1;
+        grid-row: 1;
+        position: sticky;
+        top: 0;
+        z-index: 50;
+    }
+
+    .stage {
+        grid-column: 1;
+        grid-row: 2;
+        width: 100%;
+        height: 100%;
+        border-radius: 0;
+        /* Full edge-to-edge on mobile feels better */
+    }
+
+    .sidebar-left {
+        grid-column: 1;
+        grid-row: 3;
+        max-height: 300px;
+        overflow-y: auto;
+    }
+
+    .sidebar-right {
+        grid-column: 1;
+        grid-row: 4;
+        max-height: 300px;
+        overflow-y: auto;
+    }
+
+    .footer {
+        grid-column: 1;
+        grid-row: 5;
+        position: sticky;
+        bottom: 0;
+        z-index: 50;
+    }
+}
+
+/* Mobile (Compact everything) */
+@media (max-width: 768px) {
+    body {
+        overflow: auto;
+        /* Allow scrolling on mobile */
+    }
+
+    .app-container {
+        display: flex;
+        flex-direction: column;
+        height: auto;
+        padding: 0;
+        gap: 0;
+    }
+
+    .navbar {
+        border-radius: 0;
+        border-top: none;
+        border-left: none;
+        border-right: none;
+        padding: 0 1rem;
+    }
+
+    /* Stage takes priority */
+    .stage {
+        height: 40vh;
+        border-radius: 0;
+        border: none;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    /* Panels Stacked */
+    .panel {
+        border-radius: 0;
+        border: none;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        background: rgba(15, 23, 42, 0.95);
+        /* More opaque for readibility on mobile */
+    }
+
+    .sidebar-left,
+    .sidebar-right {
+        padding: 1rem;
+    }
+
+    /* Grid for Aspect Ratio Buttons to fit mobile width */
+    .grid-cols-4 {
+        grid-template-columns: repeat(4, 1fr);
+    }
+
+    /* Footer compacted */
+    .footer {
+        border-radius: 0;
+        border: none;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        padding: 0 1rem;
+        flex-wrap: wrap;
+        height: auto;
+        padding-top: 1rem;
+        padding-bottom: 1rem;
+    }
+
+    /* Hide less important elements on super small screens if needed */
+    .btn span {
+        display: none;
+        /* Hide text on small buttons, keep icons */
+    }
+
+    .btn i {
+        margin-right: 0;
+    }
+
+    /* Reveal text for specific big buttons */
+    #btn-export span,
+    #btn-save-disk span {
+        display: inline;
+    }
+}

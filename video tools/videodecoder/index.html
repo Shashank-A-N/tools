@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Decoder | Deep Analysis</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Rajdhani:wght@300;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="../../styles.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Rajdhani', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                        orbitron: ['Orbitron', 'sans-serif']
+                    },
+                    colors: {
+                        cyber: { primary: '#eab308' } // Yellow
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- ShadowTools Unified Theme System -->
+    <link rel="stylesheet" href="../../shared/theme.css">
+    <script src="../../shared/theme.js"></script>
+
+    <!-- ShadowTools Auth System -->
+    <link rel="stylesheet" href="../../shared/auth.css">
+    <script src="../../shared/auth.js" defer></script>
+
+    <!-- ShadowTools Light Mode Text Fix -->
+    <style id="shadow-light-fix">
+        /* Prevent invisible white text in light mode */
+        .light-mode h1, .light-mode h2, .light-mode h3, .light-mode h4, .light-mode h5, .light-mode h6 {
+            color: #0f172a;
+        }
+        .light-mode p, .light-mode span, .light-mode label, .light-mode li, .light-mode td, .light-mode th {
+            color: #334155;
+        }
+        .light-mode .text-white { color: #0f172a !important; }
+        .light-mode .text-gray-100, .light-mode .text-gray-200, .light-mode .text-gray-300 {
+            color: #334155 !important;
+        }
+        .light-mode .text-slate-100, .light-mode .text-slate-200, .light-mode .text-slate-300 {
+            color: #334155 !important;
+        }
+        .light-mode .text-slate-400 { color: #64748b !important; }
+        .light-mode .text-slate-500 { color: #64748b !important; }
+
+        /* Background fixes */
+        .light-mode body {
+            background-color: #f8fafc !important;
+            color: #0f172a !important;
+        }
+        .light-mode .bg-gray-900, .light-mode .bg-slate-900 {
+            background-color: #f1f5f9 !important;
+        }
+        .light-mode .bg-gray-800, .light-mode .bg-slate-800 {
+            background-color: #e2e8f0 !important;
+        }
+        .light-mode .bg-gray-950, .light-mode .bg-slate-950 {
+            background-color: #f8fafc !important;
+        }
+        .light-mode .bg-black { background-color: #f8fafc !important; }
+        .light-mode .bg-black\/20, .light-mode .bg-black\/40, .light-mode .bg-black\/50 {
+            background-color: rgba(0,0,0,0.04) !important;
+        }
+
+        /* Border fixes */
+        .light-mode .border-white\/5, .light-mode .border-white\/10 {
+            border-color: rgba(0,0,0,0.08) !important;
+        }
+        .light-mode .border-slate-700, .light-mode .border-slate-600, .light-mode .border-gray-700 {
+            border-color: #e2e8f0 !important;
+        }
+
+        /* Glass effect fix */
+        .light-mode .glass, .light-mode .glass-effect {
+            background: rgba(255,255,255,0.85) !important;
+            border-color: rgba(0,0,0,0.08) !important;
+        }
+
+        /* Input fixes */
+        .light-mode input, .light-mode textarea, .light-mode select {
+            color: #0f172a;
+            background-color: #fff;
+            border-color: #cbd5e1;
+        }
+        .light-mode input::placeholder, .light-mode textarea::placeholder {
+            color: #94a3b8;
+        }
+
+        /* Button text fix */
+        .light-mode button { color: inherit; }
+
+        /* Code / mono text */
+        .light-mode code, .light-mode pre, .light-mode .font-mono {
+            color: #334155;
+        }
+
+        /* Accent colors stay vivid */
+        .light-mode .text-blue-400, .light-mode .text-blue-500 { color: #2563eb !important; }
+        .light-mode .text-purple-400, .light-mode .text-purple-500 { color: #7c3aed !important; }
+        .light-mode .text-green-400, .light-mode .text-green-500 { color: #16a34a !important; }
+        .light-mode .text-red-400, .light-mode .text-red-500 { color: #dc2626 !important; }
+        .light-mode .text-yellow-400, .light-mode .text-amber-400 { color: #d97706 !important; }
+        .light-mode .text-cyan-400 { color: #0891b2 !important; }
+        .light-mode .text-pink-400, .light-mode .text-pink-500 { color: #db2777 !important; }
+        .light-mode .text-orange-400 { color: #ea580c !important; }
+
+        /* Shadow/glow reduction */
+        .light-mode [class*="shadow-"] { 
+            --tw-shadow-color: rgba(0,0,0,0.06);
+        }
+
+        /* Nav bar in light mode */
+        .light-mode nav, .light-mode header {
+            background: rgba(248,250,252,0.9) !important;
+            border-color: rgba(0,0,0,0.06) !important;
+        }
+        .light-mode nav a, .light-mode header a { color: #334155; }
+        .light-mode nav a:hover, .light-mode header a:hover { color: #0f172a; }
+
+        /* Footer */
+        .light-mode footer {
+            background-color: #f1f5f9 !important;
+            border-color: rgba(0,0,0,0.06) !important;
+            color: #475569 !important;
+        }
+
+        /* Canvas/3D dimming */
+        .light-mode canvas { opacity: 0.15; }
+        .light-mode #bg-3d-container { opacity: 0.1 !important; }
+        .light-mode .noise-overlay { opacity: 0 !important; }
+    </style>
+
+    <style id="shadow-toggle-light">
+        .light-mode .theme-toggle-btn {
+            background: rgba(0,0,0,0.05) !important;
+            border-color: rgba(0,0,0,0.1) !important;
+            color: #f59e0b !important;
+        }
+    </style>
+</head>
+
+<body
+    class="bg-slate-950 text-white selection:bg-yellow-500 selection:text-black min-h-screen overflow-hidden flex flex-col">
+    <button onclick="toggleTheme()" class="theme-toggle-btn" style="position:fixed;top:12px;right:12px;z-index:9999;width:40px;height:40px;border-radius:10px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12);color:#94a3b8;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:1rem;transition:all .3s;backdrop-filter:blur(8px);" title="Toggle Theme" aria-label="Toggle Theme"><i id="theme-icon" class="fas fa-moon"></i></button>
+    
+    <!-- ShadowTools Auth Widget -->
+    <div id="shadow-auth-ui" style="position:fixed;top:12px;right:60px;z-index:9998;"></div>
+
+    <!-- Navbar -->
+    <nav
+        class="border-b border-white/5 py-3 px-6 flex justify-between items-center z-50 bg-slate-900/80 backdrop-blur-md">
+        <div class="flex items-center gap-4">
+            <a href="../index.html" class="text-slate-400 hover:text-white transition-colors">
+                <i class="fas fa-chevron-left"></i>
+            </a>
+            <div class="flex items-center gap-3">
+                <div
+                    class="w-8 h-8 rounded bg-yellow-500/10 flex items-center justify-center border border-yellow-500/20">
+                    <i class="fas fa-microchip text-yellow-500"></i>
+                </div>
+                <h1 class="text-xl font-orbitron font-bold tracking-widest uppercase">Video<span
+                        class="text-yellow-500">Decoder</span></h1>
+            </div>
+        </div>
+        <div class="flex items-center gap-4">
+            <div class="text-xs font-mono text-yellow-500/80">STREAM ANALYZER V1.0</div>
+        </div>
+    </nav>
+
+    <main class="flex-1 flex overflow-hidden">
+
+        <!-- Left: Hex View / Analysis -->
+        <div class="w-96 border-r border-white/5 bg-slate-950 flex flex-col font-mono text-xs">
+            <div
+                class="p-2 border-b border-white/5 bg-slate-900/50 uppercase tracking-wider text-slate-500 flex justify-between">
+                <span>Hex Dump</span>
+                <span>Offset: 0x00</span>
+            </div>
+            <div class="flex-1 overflow-y-auto p-4 text-slate-400 space-y-1 select-text" id="hex-view">
+                <div class="text-center mt-20 text-slate-600 italic">Load video to inspect stream</div>
+            </div>
+
+            <div class="p-2 border-t border-white/5 bg-slate-900/50">
+                <div class="grid grid-cols-2 gap-2 text-[10px] text-slate-500">
+                    <div>CODEC: <span id="meta-codec" class="text-slate-300">-</span></div>
+                    <div>SIZE: <span id="meta-size" class="text-slate-300">-</span></div>
+                    <div>RES: <span id="meta-res" class="text-slate-300">-</span></div>
+                    <div>FPS: <span id="meta-fps" class="text-slate-300">-</span></div>
+                </div>
+            </div>
+
+            <!-- Structure View -->
+            <div class="glass-effect rounded-2xl p-6 flex flex-col h-96">
+                <h3 class="font-orbitron text-blue-400 mb-4 border-b border-white/10 pb-2"><i
+                        class="fas fa-sitemap mr-2"></i>ATOM STRUCTURE</h3>
+                <div id="structure-view"
+                    class="flex-1 overflow-auto font-mono text-xs text-slate-400 space-y-1 custom-scrollbar">
+                    <div class="text-center mt-20 text-slate-600">
+                        <i class="fas fa-search text-3xl mb-2 opacity-50"></i>
+                        <p>Load file to analyze structure</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Center: Video Stage -->
+        <div class="flex-1 relative bg-black flex flex-col items-center justify-center overflow-hidden">
+            <div id="upload-overlay"
+                class="absolute inset-0 z-20 flex flex-col items-center justify-center bg-slate-900/80 backdrop-blur-sm">
+                <label class="cursor-pointer group">
+                    <div
+                        class="w-32 h-32 rounded-lg border-2 border-dashed border-white/10 flex items-center justify-center group-hover:border-yellow-500/50 transition-colors">
+                        <i
+                            class="fas fa-search text-4xl text-slate-600 group-hover:text-yellow-500 transition-colors"></i>
+                    </div>
+                    <input type="file" id="file-input" class="hidden" accept="video/*">
+                    <p class="text-center mt-4 text-sm font-mono text-slate-400 group-hover:text-white">SELECT STREAM
+                    </p>
+                </label>
+            </div>
+
+            <div class="relative w-full h-full flex items-center justify-center">
+                <video id="video-source" class="max-w-full max-h-full z-10" controls playsinline></video>
+                <canvas id="frame-canvas-overlay"
+                    class="absolute inset-0 w-full h-full object-contain pointer-events-none opacity-0"></canvas>
+            </div>
+
+            <!-- Histogram Overlay (optional, visual only) -->
+            <div class="absolute bottom-0 left-0 right-0 h-16 pointer-events-none opacity-20">
+                <div class="h-full w-full flex items-end">
+                    <div class="w-full bg-gradient-to-t from-yellow-500/20 to-transparent h-1/2"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right: Frame Inspector -->
+        <div class="w-80 border-l border-white/5 bg-slate-900/30 flex flex-col">
+            <div class="p-3 border-b border-white/5 font-orbitron text-sm font-bold text-slate-300 uppercase">
+                <i class="fas fa-images mr-2 text-yellow-500"></i> Frame Inspector
+            </div>
+
+            <div class="flex-1 p-4 overflow-y-auto space-y-4">
+                <div id="frame-canvas-container"
+                    class="aspect-video bg-black rounded border border-white/10 overflow-hidden relative">
+                    <canvas id="frame-canvas" class="w-full h-full object-contain"></canvas>
+                    <div class="absolute bottom-1 right-1 bg-black/50 px-1 text-[10px] font-mono text-yellow-500">FRAME
+                        BUFFER</div>
+                </div>
+
+                <div class="space-y-2">
+                    <button
+                        class="w-full py-2 bg-slate-800 hover:bg-slate-700 text-xs font-mono rounded border border-white/5 text-left px-3 flex justify-between items-center group"
+                        id="btn-capture">
+                        <span>CAPTURE FRAME</span>
+                        <i class="fas fa-camera text-slate-500 group-hover:text-white"></i>
+                    </button>
+                    <button
+                        class="w-full py-2 bg-slate-800 hover:bg-slate-700 text-xs font-mono rounded border border-white/5 text-left px-3 flex justify-between items-center group"
+                        id="btn-analyze-frame">
+                        <span>ANALYZE PIXELS</span>
+                        <i class="fas fa-eye-dropper text-slate-500 group-hover:text-white"></i>
+                    </button>
+                </div>
+
+                <div class="p-3 bg-slate-950 rounded border border-white/5">
+                    <h4 class="text-[10px] font-bold text-slate-500 uppercase mb-2">Color Distribution</h4>
+                    <div class="h-20 flex items-end justify-between gap-1" id="histogram">
+                        <div class="w-full bg-red-500/50 h-[40%]"></div>
+                        <div class="w-full bg-green-500/50 h-[60%]"></div>
+                        <div class="w-full bg-blue-500/50 h-[30%]"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <script type="module" src="../../shared/bg-particles.js"></script>
+    <script type="module" src="./js/App.js"></script>
+</body>
+
+</html>

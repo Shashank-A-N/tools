@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shadow Video - Resizer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Rajdhani:wght@300;500;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="../../styles.css">
+    <link rel="stylesheet" href="style.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Rajdhani', 'sans-serif'],
+                        orbitron: ['Orbitron', 'sans-serif']
+                    },
+                    colors: {
+                        cyber: { primary: '#3b82f6' }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- ShadowTools Unified Theme System -->
+    <link rel="stylesheet" href="../../shared/theme.css">
+    <script src="../../shared/theme.js"></script>
+
+    <!-- ShadowTools Auth System -->
+    <link rel="stylesheet" href="../../shared/auth.css">
+    <script src="../../shared/auth.js" defer></script>
+
+    <!-- ShadowTools Light Mode Text Fix -->
+    <style id="shadow-light-fix">
+        /* Prevent invisible white text in light mode */
+        .light-mode h1, .light-mode h2, .light-mode h3, .light-mode h4, .light-mode h5, .light-mode h6 {
+            color: #0f172a;
+        }
+        .light-mode p, .light-mode span, .light-mode label, .light-mode li, .light-mode td, .light-mode th {
+            color: #334155;
+        }
+        .light-mode .text-white { color: #0f172a !important; }
+        .light-mode .text-gray-100, .light-mode .text-gray-200, .light-mode .text-gray-300 {
+            color: #334155 !important;
+        }
+        .light-mode .text-slate-100, .light-mode .text-slate-200, .light-mode .text-slate-300 {
+            color: #334155 !important;
+        }
+        .light-mode .text-slate-400 { color: #64748b !important; }
+        .light-mode .text-slate-500 { color: #64748b !important; }
+
+        /* Background fixes */
+        .light-mode body {
+            background-color: #f8fafc !important;
+            color: #0f172a !important;
+        }
+        .light-mode .bg-gray-900, .light-mode .bg-slate-900 {
+            background-color: #f1f5f9 !important;
+        }
+        .light-mode .bg-gray-800, .light-mode .bg-slate-800 {
+            background-color: #e2e8f0 !important;
+        }
+        .light-mode .bg-gray-950, .light-mode .bg-slate-950 {
+            background-color: #f8fafc !important;
+        }
+        .light-mode .bg-black { background-color: #f8fafc !important; }
+        .light-mode .bg-black\/20, .light-mode .bg-black\/40, .light-mode .bg-black\/50 {
+            background-color: rgba(0,0,0,0.04) !important;
+        }
+
+        /* Border fixes */
+        .light-mode .border-white\/5, .light-mode .border-white\/10 {
+            border-color: rgba(0,0,0,0.08) !important;
+        }
+        .light-mode .border-slate-700, .light-mode .border-slate-600, .light-mode .border-gray-700 {
+            border-color: #e2e8f0 !important;
+        }
+
+        /* Glass effect fix */
+        .light-mode .glass, .light-mode .glass-effect {
+            background: rgba(255,255,255,0.85) !important;
+            border-color: rgba(0,0,0,0.08) !important;
+        }
+
+        /* Input fixes */
+        .light-mode input, .light-mode textarea, .light-mode select {
+            color: #0f172a;
+            background-color: #fff;
+            border-color: #cbd5e1;
+        }
+        .light-mode input::placeholder, .light-mode textarea::placeholder {
+            color: #94a3b8;
+        }
+
+        /* Button text fix */
+        .light-mode button { color: inherit; }
+
+        /* Code / mono text */
+        .light-mode code, .light-mode pre, .light-mode .font-mono {
+            color: #334155;
+        }
+
+        /* Accent colors stay vivid */
+        .light-mode .text-blue-400, .light-mode .text-blue-500 { color: #2563eb !important; }
+        .light-mode .text-purple-400, .light-mode .text-purple-500 { color: #7c3aed !important; }
+        .light-mode .text-green-400, .light-mode .text-green-500 { color: #16a34a !important; }
+        .light-mode .text-red-400, .light-mode .text-red-500 { color: #dc2626 !important; }
+        .light-mode .text-yellow-400, .light-mode .text-amber-400 { color: #d97706 !important; }
+        .light-mode .text-cyan-400 { color: #0891b2 !important; }
+        .light-mode .text-pink-400, .light-mode .text-pink-500 { color: #db2777 !important; }
+        .light-mode .text-orange-400 { color: #ea580c !important; }
+
+        /* Shadow/glow reduction */
+        .light-mode [class*="shadow-"] { 
+            --tw-shadow-color: rgba(0,0,0,0.06);
+        }
+
+        /* Nav bar in light mode */
+        .light-mode nav, .light-mode header {
+            background: rgba(248,250,252,0.9) !important;
+            border-color: rgba(0,0,0,0.06) !important;
+        }
+        .light-mode nav a, .light-mode header a { color: #334155; }
+        .light-mode nav a:hover, .light-mode header a:hover { color: #0f172a; }
+
+        /* Footer */
+        .light-mode footer {
+            background-color: #f1f5f9 !important;
+            border-color: rgba(0,0,0,0.06) !important;
+            color: #475569 !important;
+        }
+
+        /* Canvas/3D dimming */
+        .light-mode canvas { opacity: 0.15; }
+        .light-mode #bg-3d-container { opacity: 0.1 !important; }
+        .light-mode .noise-overlay { opacity: 0 !important; }
+    </style>
+
+    <style id="shadow-toggle-light">
+        .light-mode .theme-toggle-btn {
+            background: rgba(0,0,0,0.05) !important;
+            border-color: rgba(0,0,0,0.1) !important;
+            color: #f59e0b !important;
+        }
+    </style>
+</head>
+
+<body class="bg-slate-900 text-white selection:bg-blue-500 selection:text-white overflow-hidden">
+    <button onclick="toggleTheme()" class="theme-toggle-btn" style="position:fixed;top:12px;right:12px;z-index:9999;width:40px;height:40px;border-radius:10px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12);color:#94a3b8;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:1rem;transition:all .3s;backdrop-filter:blur(8px);" title="Toggle Theme" aria-label="Toggle Theme"><i id="theme-icon" class="fas fa-moon"></i></button>
+    
+    <!-- ShadowTools Auth Widget -->
+    <div id="shadow-auth-ui" style="position:fixed;top:12px;right:60px;z-index:9998;"></div>
+
+    <!-- BACKGROUND -->
+    <div id="bg-3d-container"></div>
+
+    <!-- LANDING VIEW -->
+    <div id="landing-view"
+        class="fixed inset-0 z-[100] flex flex-col items-center justify-center p-8 bg-slate-900/95 backdrop-blur-xl transition-all duration-500">
+        <div class="text-center space-y-8 animate-fade-in-up">
+            <div class="inline-block relative">
+                <div class="absolute inset-0 bg-blue-500/20 blur-3xl rounded-full animate-pulse"></div>
+                <i
+                    class="fas fa-expand-arrows-alt text-8xl text-transparent bg-clip-text bg-gradient-to-br from-blue-400 to-cyan-600 relative z-10 filter drop-shadow-lg"></i>
+            </div>
+
+            <h1 class="text-4xl md:text-6xl font-orbitron font-bold tracking-widest text-white">SHADOW<span
+                    class="text-blue-500">RESIZE</span></h1>
+            <p class="text-slate-400 text-base md:text-lg max-w-md mx-auto font-sans tracking-wide">
+                Professional Client-Side Video Scaling.<br>
+                High Quality. Custom Ratios. Fast Processing.
+            </p>
+
+            <label
+                class="group relative inline-flex items-center justify-center px-16 py-6 overflow-hidden font-bold text-white transition-all duration-300 bg-blue-600 rounded-2xl cursor-pointer hover:bg-blue-700 hover:scale-105 shadow-neon">
+                <span
+                    class="absolute inset-0 w-full h-full -mt-1 rounded-lg opacity-30 bg-gradient-to-b from-transparent via-transparent to-black"></span>
+                <span class="relative flex items-center gap-3 text-xl font-orbitron tracking-widest">
+                    <i class="fas fa-cloud-upload-alt"></i> UPLOAD VIDEO
+                </span>
+                <input type="file" id="landing-fileInput" accept="video/*" class="hidden">
+            </label>
+        </div>
+    </div>
+
+    <!-- EDITOR VIEW -->
+    <div id="editor-view"
+        class="fixed inset-0 flex flex-col opacity-0 pointer-events-none transition-opacity duration-500">
+
+        <!-- Navbar -->
+        <nav
+            class="glass-effect border-b border-white/5 py-2 px-4 md:py-3 md:px-6 flex justify-between items-center z-50">
+            <div class="flex items-center gap-2 md:gap-4">
+                <a href="../index.html" id="btn-back-home"
+                    class="flex items-center gap-2 text-slate-400 hover:text-white transition-colors">
+                    <i class="fas fa-chevron-left text-sm md:text-base"></i>
+                    <span class="font-orbitron font-bold text-xs hidden sm:inline">HOME</span>
+                </a>
+                <div class="h-4 md:h-6 w-px bg-white/10 mx-1 md:mx-2"></div>
+                <h1 class="text-sm md:text-xl font-orbitron font-bold tracking-widest">SHADOW<span
+                        class="text-blue-500">RESIZE</span></h1>
+            </div>
+
+            <button id="btn-export" disabled
+                class="btn bg-blue-600 hover:bg-blue-500 text-white px-4 py-1.5 md:px-6 md:py-2 rounded-lg font-bold font-orbitron tracking-wider disabled:opacity-50 disabled:cursor-not-allowed transition-all text-[10px] md:text-xs">
+                <i class="fas fa-download md:mr-1"></i> <span class="hidden sm:inline">EXPORT</span>
+            </button>
+        </nav>
+
+        <!-- Main Workspace (Responsive Stack) -->
+        <div class="flex-1 flex flex-col lg:flex-row overflow-hidden relative">
+
+            <!-- STAGE (Order 1 on Mobile) -->
+            <main
+                class="flex-1 bg-black/50 relative flex items-center justify-center p-4 md:p-8 overflow-hidden order-1 lg:order-1 min-h-[40vh]">
+                <div id="stage-container"
+                    class="relative w-full max-h-full aspect-video shadow-2xl border border-white/5 object-contain">
+                    <!-- Canvas injected here -->
+                </div>
+            </main>
+
+            <!-- SIDEBAR (Controls) (Order 2 on Mobile, Right on Desktop) -->
+            <aside
+                class="w-full lg:w-80 h-1/2 lg:h-auto glass-effect border-t lg:border-t-0 lg:border-l border-white/5 flex flex-col z-40 overflow-hidden order-2 lg:order-2 flex-shrink-0">
+
+                <div class="p-2 md:p-4 border-b border-white/5">
+                    <h3 class="font-orbitron text-slate-300 uppercase tracking-widest text-[10px] md:text-xs">Config
+                    </h3>
+                </div>
+
+                <div class="flex-1 overflow-y-auto p-4 md:p-6 space-y-6">
+                    <!-- Dimensions -->
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between">
+                            <h3 class="font-orbitron text-blue-400 uppercase tracking-widest text-xs md:text-sm">Target
+                                Resolution</h3>
+                            <button id="ratio-lock"
+                                class="w-7 h-7 md:w-8 md:h-8 rounded flex items-center justify-center text-blue-500 bg-blue-500/20 hover:bg-blue-500/30 transition-colors"
+                                title="Lock Aspect Ratio">
+                                <i class="fas fa-link text-xs md:text-sm"></i>
+                            </button>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="space-y-1">
+                                <label class="text-[10px] md:text-xs text-slate-500 uppercase">Width</label>
+                                <input type="number" id="input-width"
+                                    class="w-full bg-black/50 border border-white/10 rounded px-3 py-2 text-white focus:border-blue-500 outline-none font-mono text-sm">
+                            </div>
+                            <div class="space-y-1">
+                                <label class="text-[10px] md:text-xs text-slate-500 uppercase">Height</label>
+                                <input type="number" id="input-height"
+                                    class="w-full bg-black/50 border border-white/10 rounded px-3 py-2 text-white focus:border-blue-500 outline-none font-mono text-sm">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quality / Bitrate -->
+                    <div class="space-y-4">
+                        <h3 class="font-orbitron text-blue-400 uppercase tracking-widest text-xs md:text-sm">Quality
+                            Settings</h3>
+
+                        <div class="space-y-2">
+                            <div class="flex justify-between text-[10px] md:text-xs text-slate-500 uppercase">
+                                <label>Bitrate (Mbps)</label>
+                                <span id="val-bitrate" class="text-blue-400 font-mono">2.5</span>
+                            </div>
+                            <input type="range" id="input-bitrate" min="0.5" max="20" step="0.5" value="2.5"
+                                class="w-full accent-blue-500">
+                        </div>
+                    </div>
+
+                    <!-- Presets -->
+                    <div class="space-y-4">
+                        <h3 class="font-orbitron text-slate-500 uppercase tracking-widest text-[10px] md:text-xs">Quick
+                            Presets</h3>
+                        <div class="grid grid-cols-2 gap-2">
+                            <button
+                                onclick="window.app.dom.widthInput.value=1920; window.app.dom.widthInput.dispatchEvent(new Event('input'))"
+                                class="p-2 bg-white/5 hover:bg-white/10 rounded text-[10px] md:text-xs text-left transition-colors">1080p
+                                (FHD)</button>
+                            <button
+                                onclick="window.app.dom.widthInput.value=1280; window.app.dom.widthInput.dispatchEvent(new Event('input'))"
+                                class="p-2 bg-white/5 hover:bg-white/10 rounded text-[10px] md:text-xs text-left transition-colors">720p
+                                (HD)</button>
+                            <button
+                                onclick="window.app.dom.widthInput.value=1080; window.app.dom.widthInput.dispatchEvent(new Event('input'))"
+                                class="p-2 bg-white/5 hover:bg-white/10 rounded text-[10px] md:text-xs text-left transition-colors">Square
+                                (1:1)</button>
+                            <button
+                                onclick="window.app.dom.widthInput.value=1080; window.app.dom.heightInput.value=1920; window.app.dom.heightInput.dispatchEvent(new Event('input'))"
+                                class="p-2 bg-white/5 hover:bg-white/10 rounded text-[10px] md:text-xs text-left transition-colors">Story
+                                (9:16)</button>
+                        </div>
+                    </div>
+                </div>
+
+            </aside>
+
+        </div>
+    </div>
+
+    <!-- PREVIEW MODAL -->
+    <div id="preview-modal"
+        class="fixed inset-0 z-[200] flex items-center justify-center bg-black/90 backdrop-blur-md hidden">
+        <div class="bg-slate-900 border border-white/10 rounded-xl p-6 max-w-4xl w-full flex flex-col gap-4">
+            <div class="flex justify-between items-center text-slate-300 border-b border-white/5 pb-4">
+                <h3 class="font-orbitron font-bold text-xl tracking-widest">EXPORT READY</h3>
+                <button id="btn-close-preview"
+                    onclick="document.getElementById('preview-modal').classList.add('hidden')"
+                    class="hover:text-white"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="bg-black/50 rounded-lg overflow-hidden flex items-center justify-center aspect-video">
+                <video id="preview-video" controls class="max-h-[60vh] w-full object-contain"></video>
+            </div>
+            <div class="flex justify-end gap-4">
+                <button id="btn-save-disk"
+                    class="btn bg-blue-600 hover:bg-blue-500 text-white px-8 py-3 rounded-lg font-bold">SAVE TO
+                    DISK</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ENTRY POINT -->
+    <script type="module">
+        import { App } from './js/App.js';
+        document.addEventListener('DOMContentLoaded', () => {
+            window.app = new App();
+        });
+    </script>
+    <script type="module" src="../../shared/bg-particles.js"></script>
+
+</body>
+
+</html>
