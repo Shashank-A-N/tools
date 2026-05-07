@@ -1,0 +1,937 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Audio/Video Enhancer - Shadow Audio</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Rajdhani:wght@300;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../../styles.css">
+    <style>
+        .font-orbitron{font-family:'Orbitron',sans-serif}
+        .font-rajdhani{font-family:'Rajdhani',sans-serif}
+        .module-card{background:rgba(0,0,0,0.4);border:1px solid rgba(255,255,255,0.05);border-radius:1rem;padding:1.5rem;transition:all 0.3s}
+        .module-card:hover{border-color:rgba(168,85,247,0.3)}
+        .toggle-switch{position:relative;width:44px;height:24px;background:#374151;border-radius:12px;cursor:pointer;transition:background 0.3s}
+        .toggle-switch.active{background:#7c3aed}
+        .toggle-switch::after{content:'';position:absolute;top:2px;left:2px;width:20px;height:20px;background:white;border-radius:50%;transition:transform 0.3s}
+        .toggle-switch.active::after{transform:translateX(20px)}
+        .slider-track{-webkit-appearance:none;appearance:none;width:100%;height:6px;border-radius:3px;background:linear-gradient(90deg,#1e1b4b,#7c3aed);outline:none;opacity:0.9}
+        .slider-track::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:18px;height:18px;border-radius:50%;background:#a855f7;cursor:pointer;box-shadow:0 0 8px rgba(168,85,247,0.5)}
+        .slider-track::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:#a855f7;cursor:pointer;border:none}
+        .preset-card{background:rgba(0,0,0,0.3);border:1px solid rgba(255,255,255,0.08);border-radius:1rem;padding:1rem;cursor:pointer;transition:all 0.3s;text-align:center}
+        .preset-card:hover,.preset-card.active{background:rgba(124,58,237,0.15);border-color:rgba(168,85,247,0.5);transform:translateY(-2px)}
+        .preset-card.active{box-shadow:0 0 20px rgba(168,85,247,0.2)}
+        .meter-bar{height:6px;border-radius:3px;background:#1e1b4b;overflow:hidden;position:relative}
+        .meter-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,#22c55e,#eab308,#ef4444);transition:width 0.1s}
+        .glow-pulse{animation:glowPulse 2s ease-in-out infinite}
+        @keyframes glowPulse{0%,100%{box-shadow:0 0 5px rgba(168,85,247,0.3)}50%{box-shadow:0 0 20px rgba(168,85,247,0.6)}}
+        .ab-btn{position:relative;overflow:hidden}
+        .ab-btn::before{content:'';position:absolute;inset:0;background:linear-gradient(45deg,transparent 40%,rgba(255,255,255,0.1) 50%,transparent 60%);transform:translateX(-100%);transition:transform 0.6s}
+        .ab-btn:hover::before{transform:translateX(100%)}
+        canvas{image-rendering:pixelated}
+    </style>
+    <!-- Shared Theme System -->
+    <link rel="stylesheet" href="../../shared/theme.css">
+    <link rel="stylesheet" href="../shared/audio-tool-theme.css">
+    <script src="../../shared/theme.js"></script>
+
+    <!-- ShadowTools Auth System -->
+    <link rel="stylesheet" href="../../shared/auth.css">
+    <script src="../../shared/auth.js" defer></script>
+
+    <!-- ShadowTools Light Mode Text Fix -->
+    <style id="shadow-light-fix">
+        /* Prevent invisible white text in light mode */
+        .light-mode h1, .light-mode h2, .light-mode h3, .light-mode h4, .light-mode h5, .light-mode h6 {
+            color: #0f172a;
+        }
+        .light-mode p, .light-mode span, .light-mode label, .light-mode li, .light-mode td, .light-mode th {
+            color: #334155;
+        }
+        .light-mode .text-white { color: #0f172a !important; }
+        .light-mode .text-gray-100, .light-mode .text-gray-200, .light-mode .text-gray-300 {
+            color: #334155 !important;
+        }
+        .light-mode .text-slate-100, .light-mode .text-slate-200, .light-mode .text-slate-300 {
+            color: #334155 !important;
+        }
+        .light-mode .text-slate-400 { color: #64748b !important; }
+        .light-mode .text-slate-500 { color: #64748b !important; }
+
+        /* Background fixes */
+        .light-mode body {
+            background-color: #f8fafc !important;
+            color: #0f172a !important;
+        }
+        .light-mode .bg-gray-900, .light-mode .bg-slate-900 {
+            background-color: #f1f5f9 !important;
+        }
+        .light-mode .bg-gray-800, .light-mode .bg-slate-800 {
+            background-color: #e2e8f0 !important;
+        }
+        .light-mode .bg-gray-950, .light-mode .bg-slate-950 {
+            background-color: #f8fafc !important;
+        }
+        .light-mode .bg-black { background-color: #f8fafc !important; }
+        .light-mode .bg-black\/20, .light-mode .bg-black\/40, .light-mode .bg-black\/50 {
+            background-color: rgba(0,0,0,0.04) !important;
+        }
+
+        /* Border fixes */
+        .light-mode .border-white\/5, .light-mode .border-white\/10 {
+            border-color: rgba(0,0,0,0.08) !important;
+        }
+        .light-mode .border-slate-700, .light-mode .border-slate-600, .light-mode .border-gray-700 {
+            border-color: #e2e8f0 !important;
+        }
+
+        /* Glass effect fix */
+        .light-mode .glass, .light-mode .glass-effect {
+            background: rgba(255,255,255,0.85) !important;
+            border-color: rgba(0,0,0,0.08) !important;
+        }
+
+        /* Input fixes */
+        .light-mode input, .light-mode textarea, .light-mode select {
+            color: #0f172a;
+            background-color: #fff;
+            border-color: #cbd5e1;
+        }
+        .light-mode input::placeholder, .light-mode textarea::placeholder {
+            color: #94a3b8;
+        }
+
+        /* Button text fix */
+        .light-mode button { color: inherit; }
+
+        /* Code / mono text */
+        .light-mode code, .light-mode pre, .light-mode .font-mono {
+            color: #334155;
+        }
+
+        /* Accent colors stay vivid */
+        .light-mode .text-blue-400, .light-mode .text-blue-500 { color: #2563eb !important; }
+        .light-mode .text-purple-400, .light-mode .text-purple-500 { color: #7c3aed !important; }
+        .light-mode .text-green-400, .light-mode .text-green-500 { color: #16a34a !important; }
+        .light-mode .text-red-400, .light-mode .text-red-500 { color: #dc2626 !important; }
+        .light-mode .text-yellow-400, .light-mode .text-amber-400 { color: #d97706 !important; }
+        .light-mode .text-cyan-400 { color: #0891b2 !important; }
+        .light-mode .text-pink-400, .light-mode .text-pink-500 { color: #db2777 !important; }
+        .light-mode .text-orange-400 { color: #ea580c !important; }
+
+        /* Shadow/glow reduction */
+        .light-mode [class*="shadow-"] { 
+            --tw-shadow-color: rgba(0,0,0,0.06);
+        }
+
+        /* Nav bar in light mode */
+        .light-mode nav, .light-mode header {
+            background: rgba(248,250,252,0.9) !important;
+            border-color: rgba(0,0,0,0.06) !important;
+        }
+        .light-mode nav a, .light-mode header a { color: #334155; }
+        .light-mode nav a:hover, .light-mode header a:hover { color: #0f172a; }
+
+        /* Footer */
+        .light-mode footer {
+            background-color: #f1f5f9 !important;
+            border-color: rgba(0,0,0,0.06) !important;
+            color: #475569 !important;
+        }
+
+        /* Canvas/3D dimming */
+        .light-mode canvas { opacity: 0.15; }
+        .light-mode #bg-3d-container { opacity: 0.1 !important; }
+        .light-mode .noise-overlay { opacity: 0 !important; }
+    </style>
+</head>
+<body class="bg-gray-900 text-white font-sans antialiased overflow-x-hidden">
+    <button onclick="toggleTheme()" class="theme-toggle-btn" style="position:fixed;top:12px;right:12px;z-index:9999;width:40px;height:40px;border-radius:10px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12);color:#94a3b8;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:1rem;transition:all .3s;backdrop-filter:blur(8px);" title="Toggle Theme" aria-label="Toggle Theme"><i id="theme-icon" class="fas fa-moon"></i></button>
+    <!-- ShadowTools Auth Widget -->
+    <div id="shadow-auth-ui" style="position:fixed;top:12px;right:60px;z-index:9998;"></div>
+
+    <!-- NAV -->
+    <nav class="sticky top-0 z-50 glass-effect border-b border-white/5 px-6 py-4 flex items-center justify-between backdrop-blur-md bg-gray-900/80">
+        <div class="flex items-center gap-3">
+            
+        <a href="../index.html" class="flex items-center gap-2 group">
+                <div class="relative w-10 h-10 flex items-center justify-center bg-purple-600/20 rounded-lg border border-purple-500/30 group-hover:border-purple-500/50 transition-all glow-pulse">
+                    <i class="fas fa-wand-magic-sparkles text-purple-400 text-xl group-hover:scale-110 transition-transform"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-orbitron font-bold tracking-widest text-white">SHADOW<span class="text-purple-500">AUDIO</span></h1>
+                    <span class="text-xs text-slate-400 font-mono tracking-wider">ENHANCE PRO</span>
+                </div>
+            </a>
+        </div>
+        
+        <a href="../index.html" class="text-slate-400 hover:text-white transition-colors"><i class="fas fa-times text-xl"></i></a>
+    </nav>
+
+    <main class="container mx-auto px-4 py-8 max-w-6xl">
+        <!-- HEADER -->
+        <div class="text-center mb-8">
+            <h2 class="text-4xl font-bold font-orbitron mb-2">Audio / Video <span class="text-purple-400">Enhancer</span></h2>
+            <p class="text-slate-400 text-sm max-w-xl mx-auto">Professional noise reduction, voice enhancement, pitch correction & dynamic processing. Make your audio & video content stand out.</p>
+        </div>
+
+        <!-- UPLOAD AREA -->
+        <div id="upload-area" class="border-2 border-dashed border-white/10 rounded-2xl p-12 text-center hover:border-purple-500/50 transition-all cursor-pointer mb-8 bg-black/20 max-w-2xl mx-auto">
+            <input type="file" id="file-input" accept="audio/*,video/*" class="hidden">
+            <i class="fas fa-cloud-upload-alt text-5xl text-slate-500 mb-4"></i>
+            <p class="text-xl font-bold text-slate-300 mb-1">Drop Audio or Video File</p>
+            <p class="text-sm text-slate-500">Supports MP3, WAV, OGG, FLAC, MP4, WEBM</p>
+        </div>
+
+        <!-- MAIN WORKSPACE (hidden until file loaded) -->
+        <div id="workspace" class="hidden space-y-6">
+
+            <!-- FILE INFO BAR -->
+            <div class="flex flex-wrap items-center justify-between bg-black/30 rounded-xl px-6 py-3 border border-white/5">
+                <div class="flex items-center gap-3">
+                    <i class="fas fa-file-audio text-purple-400 text-lg"></i>
+                    <span id="file-name" class="font-mono text-sm text-slate-300 truncate max-w-xs">filename.mp3</span>
+                </div>
+                <div class="flex gap-6 text-xs text-slate-500 font-mono">
+                    <span id="file-duration">0:00</span>
+                    <span id="file-rate">44100 Hz</span>
+                    <span id="file-channels">Stereo</span>
+                </div>
+            </div>
+
+            <!-- PRESETS -->
+            <div>
+                <h3 class="font-orbitron text-sm text-purple-400 mb-3 tracking-wider">PRESETS</h3>
+                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">
+                    <div class="preset-card active" data-preset="podcast"><i class="fas fa-podcast text-2xl text-purple-400 mb-2"></i><div class="text-xs font-bold">Podcast</div></div>
+                    <div class="preset-card" data-preset="youtube"><i class="fab fa-youtube text-2xl text-red-400 mb-2"></i><div class="text-xs font-bold">YouTube</div></div>
+                    <div class="preset-card" data-preset="music"><i class="fas fa-music text-2xl text-cyan-400 mb-2"></i><div class="text-xs font-bold">Music</div></div>
+                    <div class="preset-card" data-preset="voiceover"><i class="fas fa-microphone-alt text-2xl text-amber-400 mb-2"></i><div class="text-xs font-bold">Voice-over</div></div>
+                    <div class="preset-card" data-preset="clean"><i class="fas fa-broom text-2xl text-green-400 mb-2"></i><div class="text-xs font-bold">Clean Noise</div></div>
+                    <div class="preset-card" data-preset="custom"><i class="fas fa-sliders-h text-2xl text-slate-400 mb-2"></i><div class="text-xs font-bold">Custom</div></div>
+                </div>
+            </div>
+
+            <!-- PROCESSING MODULES -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+                <!-- NOISE REDUCTION -->
+                <div class="module-card">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center gap-2"><i class="fas fa-volume-xmark text-red-400"></i><span class="font-bold text-sm">Noise Reduction</span></div>
+                        <div class="toggle-switch active" data-module="noise" id="toggle-noise"></div>
+                    </div>
+                    <div id="mod-noise" class="space-y-3">
+                        <div><label class="text-xs text-slate-400 flex justify-between"><span>High-Pass Filter</span><span id="v-hpf">80 Hz</span></label><input type="range" class="slider-track w-full" id="hpf-freq" min="20" max="500" value="80"></div>
+                        <div><label class="text-xs text-slate-400 flex justify-between"><span>Noise Gate Threshold</span><span id="v-gate">-50 dB</span></label><input type="range" class="slider-track w-full" id="gate-threshold" min="-80" max="-10" value="-50"></div>
+                        <div><label class="text-xs text-slate-400 flex justify-between"><span>Reduction Strength</span><span id="v-nr-str">60%</span></label><input type="range" class="slider-track w-full" id="nr-strength" min="0" max="100" value="60"></div>
+                    </div>
+                </div>
+
+                <!-- VOICE ENHANCEMENT -->
+                <div class="module-card">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center gap-2"><i class="fas fa-microphone text-cyan-400"></i><span class="font-bold text-sm">Voice Enhancement</span></div>
+                        <div class="toggle-switch active" data-module="voice" id="toggle-voice"></div>
+                    </div>
+                    <div id="mod-voice" class="space-y-3">
+                        <div><label class="text-xs text-slate-400 flex justify-between"><span>Warmth (200-400 Hz)</span><span id="v-warmth">+3 dB</span></label><input type="range" class="slider-track w-full" id="warmth" min="-6" max="12" value="3"></div>
+                        <div><label class="text-xs text-slate-400 flex justify-between"><span>Presence (2-5 kHz)</span><span id="v-presence">+4 dB</span></label><input type="range" class="slider-track w-full" id="presence" min="-6" max="12" value="4"></div>
+                        <div><label class="text-xs text-slate-400 flex justify-between"><span>Air (8-12 kHz)</span><span id="v-air">+2 dB</span></label><input type="range" class="slider-track w-full" id="air" min="-6" max="12" value="2"></div>
+                    </div>
+                </div>
+
+                <!-- DYNAMICS -->
+                <div class="module-card">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center gap-2"><i class="fas fa-compress-alt text-amber-400"></i><span class="font-bold text-sm">Dynamics / Compression</span></div>
+                        <div class="toggle-switch active" data-module="dynamics" id="toggle-dynamics"></div>
+                    </div>
+                    <div id="mod-dynamics" class="space-y-3">
+                        <div><label class="text-xs text-slate-400 flex justify-between"><span>Threshold</span><span id="v-comp-thresh">-24 dB</span></label><input type="range" class="slider-track w-full" id="comp-threshold" min="-60" max="0" value="-24"></div>
+                        <div><label class="text-xs text-slate-400 flex justify-between"><span>Ratio</span><span id="v-comp-ratio">4:1</span></label><input type="range" class="slider-track w-full" id="comp-ratio" min="1" max="20" value="4"></div>
+                        <div><label class="text-xs text-slate-400 flex justify-between"><span>Attack</span><span id="v-comp-attack">5 ms</span></label><input type="range" class="slider-track w-full" id="comp-attack" min="0" max="100" value="5"></div>
+                        <div><label class="text-xs text-slate-400 flex justify-between"><span>Release</span><span id="v-comp-release">100 ms</span></label><input type="range" class="slider-track w-full" id="comp-release" min="10" max="1000" value="100"></div>
+                        <div><label class="text-xs text-slate-400 flex justify-between"><span>Makeup Gain</span><span id="v-makeup">+6 dB</span></label><input type="range" class="slider-track w-full" id="makeup-gain" min="0" max="24" value="6"></div>
+                    </div>
+                </div>
+
+                <!-- PITCH & DE-ESS -->
+                <div class="module-card">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center gap-2"><i class="fas fa-wave-square text-green-400"></i><span class="font-bold text-sm">Pitch & De-esser</span></div>
+                        <div class="toggle-switch" data-module="pitch" id="toggle-pitch"></div>
+                    </div>
+                    <div id="mod-pitch" class="space-y-3">
+                        <div><label class="text-xs text-slate-400 flex justify-between"><span>Pitch Shift (semitones)</span><span id="v-pitch">0</span></label><input type="range" class="slider-track w-full" id="pitch-shift" min="-12" max="12" value="0"></div>
+                        <div class="border-t border-white/5 pt-3 mt-2">
+                            <label class="text-xs text-slate-400 flex justify-between mb-1"><span>De-esser (4-9 kHz)</span><span id="v-deess">Off</span></label>
+                            <input type="range" class="slider-track w-full" id="deess-amount" min="0" max="100" value="0">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- BASS/TREBLE & STEREO -->
+                <div class="module-card">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center gap-2"><i class="fas fa-guitar text-pink-400"></i><span class="font-bold text-sm">Tone & Stereo</span></div>
+                        <div class="toggle-switch" data-module="tone" id="toggle-tone"></div>
+                    </div>
+                    <div id="mod-tone" class="space-y-3">
+                        <div><label class="text-xs text-slate-400 flex justify-between"><span>Bass Boost</span><span id="v-bass">0 dB</span></label><input type="range" class="slider-track w-full" id="bass-boost" min="-6" max="12" value="0"></div>
+                        <div><label class="text-xs text-slate-400 flex justify-between"><span>Treble Boost</span><span id="v-treble">0 dB</span></label><input type="range" class="slider-track w-full" id="treble-boost" min="-6" max="12" value="0"></div>
+                        <div><label class="text-xs text-slate-400 flex justify-between"><span>Stereo Width</span><span id="v-stereo">100%</span></label><input type="range" class="slider-track w-full" id="stereo-width" min="0" max="200" value="100"></div>
+                    </div>
+                </div>
+
+                <!-- LIMITER & NORMALIZE -->
+                <div class="module-card">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center gap-2"><i class="fas fa-shield-halved text-emerald-400"></i><span class="font-bold text-sm">Limiter & Normalize</span></div>
+                        <div class="toggle-switch active" data-module="limiter" id="toggle-limiter"></div>
+                    </div>
+                    <div id="mod-limiter" class="space-y-3">
+                        <div><label class="text-xs text-slate-400 flex justify-between"><span>Limiter Ceiling</span><span id="v-ceiling">-1 dB</span></label><input type="range" class="slider-track w-full" id="limiter-ceiling" min="-6" max="0" value="-1"></div>
+                        <div class="flex items-center gap-3 mt-2">
+                            <input type="checkbox" id="normalize-check" class="accent-purple-500 w-4 h-4" checked>
+                            <label for="normalize-check" class="text-xs text-slate-400">Auto-normalize to peak</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- LEVEL METERS -->
+            <div class="bg-black/30 rounded-xl px-6 py-4 border border-white/5">
+                <div class="grid grid-cols-2 gap-6">
+                    <div><span class="text-xs text-slate-500 block mb-1">Input Level</span><div class="meter-bar"><div class="meter-fill" id="meter-in" style="width:0%"></div></div></div>
+                    <div><span class="text-xs text-slate-500 block mb-1">Output Level</span><div class="meter-bar"><div class="meter-fill" id="meter-out" style="width:0%"></div></div></div>
+                </div>
+            </div>
+
+            <!-- VISUALIZER -->
+            <div class="bg-black/30 rounded-xl p-4 border border-white/5">
+                <div class="flex items-center justify-between mb-3">
+                    <span class="text-xs font-orbitron text-purple-400 tracking-wider">SPECTRUM ANALYZER</span>
+                    <div class="flex gap-2">
+                        <button id="viz-freq" class="text-xs px-3 py-1 rounded-lg bg-purple-600/30 text-purple-300 border border-purple-500/30">Frequency</button>
+                        <button id="viz-wave" class="text-xs px-3 py-1 rounded-lg bg-black/30 text-slate-400 border border-white/10">Waveform</button>
+                    </div>
+                </div>
+                <canvas id="visualizer" width="800" height="120" class="w-full h-28 rounded-lg"></canvas>
+            </div>
+
+            <!-- PLAYBACK CONTROLS -->
+            <div class="flex flex-wrap items-center justify-center gap-4">
+                <button id="play-btn" class="px-8 py-3 bg-green-600 hover:bg-green-500 text-white font-bold rounded-xl transition-all flex items-center gap-2 shadow-lg shadow-green-900/30">
+                    <i class="fas fa-play"></i> Play
+                </button>
+                <button id="stop-btn" class="px-8 py-3 bg-red-600 hover:bg-red-500 text-white font-bold rounded-xl transition-all flex items-center gap-2" disabled>
+                    <i class="fas fa-stop"></i> Stop
+                </button>
+                <button id="ab-btn" class="ab-btn px-8 py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl transition-all flex items-center gap-2">
+                    <i class="fas fa-arrows-left-right"></i> <span id="ab-label">Bypass: OFF</span>
+                </button>
+                <button id="export-btn" class="px-8 py-3 bg-purple-600 hover:bg-purple-500 text-white font-bold rounded-xl transition-all flex items-center gap-2 shadow-lg shadow-purple-900/30">
+                    <i class="fas fa-download"></i> Export WAV
+                </button>
+            </div>
+
+            <!-- EXPORT PROGRESS -->
+            <div id="export-progress" class="hidden bg-black/30 rounded-xl px-6 py-4 border border-purple-500/30">
+                <div class="flex items-center gap-3">
+                    <i class="fas fa-spinner fa-spin text-purple-400"></i>
+                    <span class="text-sm text-slate-300" id="export-status">Rendering...</span>
+                </div>
+                <div class="meter-bar mt-2"><div class="meter-fill" id="export-bar" style="width:0%;background:linear-gradient(90deg,#7c3aed,#a855f7)"></div></div>
+            </div>
+        </div>
+    </main>
+
+    <script type="module">
+    import { audioEngine } from '../shared/audio-utils.js';
+
+    /* ====== STATE ====== */
+    let audioBuffer = null, sourceNode = null, isPlaying = false, isBypassed = false;
+    let vizType = 'frequency';
+    let currentPreset = 'podcast';
+    let analyserNode = null, animFrameId = null;
+
+    /* Module active states */
+    const modules = { noise: true, voice: true, dynamics: true, pitch: false, tone: false, limiter: true };
+
+    /* ====== PRESETS ====== */
+    const presets = {
+        podcast:   { noise:true,voice:true,dynamics:true,pitch:false,tone:false,limiter:true, values:{'hpf-freq':100,'gate-threshold':-45,'nr-strength':70,'warmth':4,'presence':5,'air':2,'comp-threshold':-20,'comp-ratio':4,'comp-attack':5,'comp-release':150,'makeup-gain':8,'pitch-shift':0,'deess-amount':40,'bass-boost':1,'treble-boost':0,'stereo-width':100,'limiter-ceiling':-1,'normalize-check':true}},
+        youtube:   { noise:true,voice:true,dynamics:true,pitch:false,tone:true,limiter:true, values:{'hpf-freq':80,'gate-threshold':-50,'nr-strength':50,'warmth':3,'presence':4,'air':3,'comp-threshold':-24,'comp-ratio':3,'comp-attack':10,'comp-release':100,'makeup-gain':6,'pitch-shift':0,'deess-amount':30,'bass-boost':2,'treble-boost':1,'stereo-width':120,'limiter-ceiling':-1,'normalize-check':true}},
+        music:     { noise:false,voice:false,dynamics:true,pitch:false,tone:true,limiter:true, values:{'hpf-freq':30,'gate-threshold':-60,'nr-strength':20,'warmth':0,'presence':0,'air':0,'comp-threshold':-18,'comp-ratio':2,'comp-attack':20,'comp-release':200,'makeup-gain':4,'pitch-shift':0,'deess-amount':0,'bass-boost':3,'treble-boost':2,'stereo-width':150,'limiter-ceiling':-1,'normalize-check':true}},
+        voiceover: { noise:true,voice:true,dynamics:true,pitch:false,tone:false,limiter:true, values:{'hpf-freq':120,'gate-threshold':-40,'nr-strength':80,'warmth':5,'presence':6,'air':1,'comp-threshold':-18,'comp-ratio':6,'comp-attack':3,'comp-release':80,'makeup-gain':10,'pitch-shift':0,'deess-amount':50,'bass-boost':0,'treble-boost':0,'stereo-width':100,'limiter-ceiling':-1,'normalize-check':true}},
+        clean:     { noise:true,voice:false,dynamics:false,pitch:false,tone:false,limiter:true, values:{'hpf-freq':150,'gate-threshold':-35,'nr-strength':100,'warmth':0,'presence':0,'air':0,'comp-threshold':-24,'comp-ratio':4,'comp-attack':5,'comp-release':100,'makeup-gain':0,'pitch-shift':0,'deess-amount':0,'bass-boost':0,'treble-boost':0,'stereo-width':100,'limiter-ceiling':-1,'normalize-check':true}},
+        custom:    { noise:true,voice:true,dynamics:true,pitch:true,tone:true,limiter:true, values:{'hpf-freq':80,'gate-threshold':-50,'nr-strength':60,'warmth':3,'presence':4,'air':2,'comp-threshold':-24,'comp-ratio':4,'comp-attack':5,'comp-release':100,'makeup-gain':6,'pitch-shift':0,'deess-amount':0,'bass-boost':0,'treble-boost':0,'stereo-width':100,'limiter-ceiling':-1,'normalize-check':true}}
+    };
+
+    /* ====== DOM REFS ====== */
+    const $ = id => document.getElementById(id);
+    const uploadArea = $('upload-area'), fileInput = $('file-input'), workspace = $('workspace');
+
+    /* ====== FILE UPLOAD ====== */
+    uploadArea.addEventListener('click', () => fileInput.click());
+    uploadArea.addEventListener('dragover', e => { e.preventDefault(); uploadArea.classList.add('border-purple-500'); });
+    uploadArea.addEventListener('dragleave', () => uploadArea.classList.remove('border-purple-500'));
+    uploadArea.addEventListener('drop', e => { e.preventDefault(); uploadArea.classList.remove('border-purple-500'); handleFile(e.dataTransfer.files[0]); });
+    fileInput.addEventListener('change', e => handleFile(e.target.files[0]));
+
+    async function handleFile(file) {
+        if (!file) return;
+        uploadArea.classList.add('hidden');
+        workspace.classList.remove('hidden');
+        $('file-name').textContent = file.name;
+
+        const ctx = audioEngine.init();
+        let arrayBuffer;
+        if (file.type.startsWith('video/')) {
+            // Extract audio from video
+            const videoURL = URL.createObjectURL(file);
+            const tempVideo = document.createElement('video');
+            tempVideo.src = videoURL;
+            tempVideo.muted = true;
+            await new Promise(r => tempVideo.addEventListener('loadedmetadata', r));
+            arrayBuffer = await file.arrayBuffer();
+        } else {
+            arrayBuffer = await file.arrayBuffer();
+        }
+
+        try {
+            audioBuffer = await ctx.decodeAudioData(arrayBuffer);
+        } catch(err) {
+            // For video files, try extracting audio via MediaSource if decode fails
+            alert('Could not decode audio from this file. Please try a different format.');
+            return;
+        }
+
+        const dur = audioBuffer.duration;
+        const mins = Math.floor(dur / 60);
+        const secs = Math.floor(dur % 60);
+        $('file-duration').textContent = `${mins}:${secs.toString().padStart(2,'0')}`;
+        $('file-rate').textContent = `${audioBuffer.sampleRate} Hz`;
+        $('file-channels').textContent = audioBuffer.numberOfChannels === 1 ? 'Mono' : 'Stereo';
+
+        applyPreset('podcast');
+    }
+
+    /* ====== PRESETS ====== */
+    document.querySelectorAll('.preset-card').forEach(card => {
+        card.addEventListener('click', () => {
+            document.querySelectorAll('.preset-card').forEach(c => c.classList.remove('active'));
+            card.classList.add('active');
+            currentPreset = card.dataset.preset;
+            applyPreset(currentPreset);
+        });
+    });
+
+    function applyPreset(name) {
+        const p = presets[name];
+        if (!p) return;
+        // Set module toggles
+        Object.keys(modules).forEach(m => {
+            modules[m] = p[m];
+            const toggle = $('toggle-' + m);
+            if (toggle) toggle.classList.toggle('active', p[m]);
+        });
+        // Set slider values
+        Object.entries(p.values).forEach(([id, val]) => {
+            const el = $(id);
+            if (!el) return;
+            if (el.type === 'checkbox') el.checked = val;
+            else el.value = val;
+            el.dispatchEvent(new Event('input'));
+        });
+    }
+
+    /* ====== TOGGLES ====== */
+    document.querySelectorAll('.toggle-switch').forEach(tog => {
+        tog.addEventListener('click', () => {
+            const mod = tog.dataset.module;
+            modules[mod] = !modules[mod];
+            tog.classList.toggle('active', modules[mod]);
+            currentPreset = 'custom';
+            document.querySelectorAll('.preset-card').forEach(c => c.classList.remove('active'));
+            document.querySelector('[data-preset="custom"]').classList.add('active');
+        });
+    });
+
+    /* ====== SLIDER LABELS ====== */
+    function bindSlider(id, labelId, fmt) {
+        const el = $(id);
+        if (!el) return;
+        el.addEventListener('input', () => { $(labelId).textContent = fmt(el.value); });
+    }
+    bindSlider('hpf-freq', 'v-hpf', v => v + ' Hz');
+    bindSlider('gate-threshold', 'v-gate', v => v + ' dB');
+    bindSlider('nr-strength', 'v-nr-str', v => v + '%');
+    bindSlider('warmth', 'v-warmth', v => (v >= 0 ? '+' : '') + v + ' dB');
+    bindSlider('presence', 'v-presence', v => (v >= 0 ? '+' : '') + v + ' dB');
+    bindSlider('air', 'v-air', v => (v >= 0 ? '+' : '') + v + ' dB');
+    bindSlider('comp-threshold', 'v-comp-thresh', v => v + ' dB');
+    bindSlider('comp-ratio', 'v-comp-ratio', v => v + ':1');
+    bindSlider('comp-attack', 'v-comp-attack', v => v + ' ms');
+    bindSlider('comp-release', 'v-comp-release', v => v + ' ms');
+    bindSlider('makeup-gain', 'v-makeup', v => '+' + v + ' dB');
+    bindSlider('pitch-shift', 'v-pitch', v => (v > 0 ? '+' : '') + v + ' st');
+    bindSlider('deess-amount', 'v-deess', v => v == 0 ? 'Off' : v + '%');
+    bindSlider('bass-boost', 'v-bass', v => (v >= 0 ? '+' : '') + v + ' dB');
+    bindSlider('treble-boost', 'v-treble', v => (v >= 0 ? '+' : '') + v + ' dB');
+    bindSlider('stereo-width', 'v-stereo', v => v + '%');
+    bindSlider('limiter-ceiling', 'v-ceiling', v => v + ' dB');
+
+    /* ====== BUILD AUDIO CHAIN ====== */
+    function buildChain(ctx, source, bypass) {
+        let node = source;
+
+        if (bypass) {
+            const analyser = ctx.createAnalyser();
+            analyser.fftSize = 2048;
+            node.connect(analyser);
+            analyser.connect(ctx.destination);
+            return analyser;
+        }
+
+        // Pitch shift via playbackRate
+        if (modules.pitch) {
+            const semitones = parseInt($('pitch-shift').value);
+            source.playbackRate.value = Math.pow(2, semitones / 12);
+        } else {
+            source.playbackRate.value = 1;
+        }
+
+        // Noise Reduction: High-pass + noise gate approximation via compressor
+        if (modules.noise) {
+            const hpf = ctx.createBiquadFilter();
+            hpf.type = 'highpass';
+            hpf.frequency.value = parseInt($('hpf-freq').value);
+            hpf.Q.value = 0.7;
+            node.connect(hpf);
+            node = hpf;
+
+            // Low-pass to remove hiss > 16kHz
+            const lpf = ctx.createBiquadFilter();
+            lpf.type = 'lowpass';
+            lpf.frequency.value = 16000;
+            lpf.Q.value = 0.5;
+            node.connect(lpf);
+            node = lpf;
+
+            // Noise gate simulation via expander (aggressive compressor below threshold)
+            const gate = ctx.createDynamicsCompressor();
+            gate.threshold.value = parseInt($('gate-threshold').value);
+            gate.knee.value = 2;
+            gate.ratio.value = 20;
+            gate.attack.value = 0.001;
+            gate.release.value = 0.05;
+            node.connect(gate);
+            node = gate;
+
+            // Multi-band noise suppression notch filters based on strength
+            const strength = parseInt($('nr-strength').value) / 100;
+            if (strength > 0.3) {
+                // Notch filter to reduce common hum frequencies
+                const notch60 = ctx.createBiquadFilter();
+                notch60.type = 'notch';
+                notch60.frequency.value = 60;
+                notch60.Q.value = 10 * strength;
+                node.connect(notch60);
+                node = notch60;
+
+                const notch120 = ctx.createBiquadFilter();
+                notch120.type = 'notch';
+                notch120.frequency.value = 120;
+                notch120.Q.value = 10 * strength;
+                node.connect(notch120);
+                node = notch120;
+            }
+        }
+
+        // Voice Enhancement EQ
+        if (modules.voice) {
+            // Warmth: low-mid boost at 300 Hz
+            const warmth = ctx.createBiquadFilter();
+            warmth.type = 'peaking';
+            warmth.frequency.value = 300;
+            warmth.Q.value = 1;
+            warmth.gain.value = parseFloat($('warmth').value);
+            node.connect(warmth);
+            node = warmth;
+
+            // Presence: upper-mid boost at 3kHz
+            const pres = ctx.createBiquadFilter();
+            pres.type = 'peaking';
+            pres.frequency.value = 3000;
+            pres.Q.value = 1.2;
+            pres.gain.value = parseFloat($('presence').value);
+            node.connect(pres);
+            node = pres;
+
+            // Air: high shelf at 10kHz
+            const airF = ctx.createBiquadFilter();
+            airF.type = 'highshelf';
+            airF.frequency.value = 10000;
+            airF.gain.value = parseFloat($('air').value);
+            node.connect(airF);
+            node = airF;
+        }
+
+        // De-esser (narrow-band compressor on sibilant frequencies)
+        if (modules.pitch) {
+            const deessAmt = parseInt($('deess-amount').value);
+            if (deessAmt > 0) {
+                // Band-pass filter to isolate sibilance
+                const deessBand = ctx.createBiquadFilter();
+                deessBand.type = 'peaking';
+                deessBand.frequency.value = 6500;
+                deessBand.Q.value = 2;
+                deessBand.gain.value = -(deessAmt / 10);
+                node.connect(deessBand);
+                node = deessBand;
+            }
+        }
+
+        // Dynamics Compression
+        if (modules.dynamics) {
+            const comp = ctx.createDynamicsCompressor();
+            comp.threshold.value = parseInt($('comp-threshold').value);
+            comp.knee.value = 6;
+            comp.ratio.value = parseInt($('comp-ratio').value);
+            comp.attack.value = parseInt($('comp-attack').value) / 1000;
+            comp.release.value = parseInt($('comp-release').value) / 1000;
+            node.connect(comp);
+            node = comp;
+
+            // Makeup gain
+            const makeup = ctx.createGain();
+            makeup.gain.value = Math.pow(10, parseInt($('makeup-gain').value) / 20);
+            node.connect(makeup);
+            node = makeup;
+        }
+
+        // Tone: Bass + Treble
+        if (modules.tone) {
+            const bass = ctx.createBiquadFilter();
+            bass.type = 'lowshelf';
+            bass.frequency.value = 150;
+            bass.gain.value = parseFloat($('bass-boost').value);
+            node.connect(bass);
+            node = bass;
+
+            const treble = ctx.createBiquadFilter();
+            treble.type = 'highshelf';
+            treble.frequency.value = 6000;
+            treble.gain.value = parseFloat($('treble-boost').value);
+            node.connect(treble);
+            node = treble;
+        }
+
+        // Limiter
+        if (modules.limiter) {
+            const limiter = ctx.createDynamicsCompressor();
+            limiter.threshold.value = parseInt($('limiter-ceiling').value);
+            limiter.knee.value = 0;
+            limiter.ratio.value = 20;
+            limiter.attack.value = 0.001;
+            limiter.release.value = 0.01;
+            node.connect(limiter);
+            node = limiter;
+        }
+
+        // Final analyser
+        const analyser = ctx.createAnalyser();
+        analyser.fftSize = 2048;
+        node.connect(analyser);
+        analyser.connect(ctx.destination);
+        return analyser;
+    }
+
+    /* ====== PLAYBACK ====== */
+    $('play-btn').addEventListener('click', () => {
+        if (!audioBuffer || isPlaying) return;
+        startPlayback();
+    });
+
+    $('stop-btn').addEventListener('click', () => {
+        stopPlayback();
+    });
+
+    function startPlayback() {
+        const ctx = audioEngine.init();
+        sourceNode = ctx.createBufferSource();
+        sourceNode.buffer = audioBuffer;
+
+        analyserNode = buildChain(ctx, sourceNode, isBypassed);
+
+        sourceNode.onended = () => {
+            isPlaying = false;
+            $('play-btn').disabled = false;
+            $('stop-btn').disabled = true;
+            cancelAnimationFrame(animFrameId);
+        };
+
+        sourceNode.start(0);
+        isPlaying = true;
+        $('play-btn').disabled = true;
+        $('stop-btn').disabled = false;
+        drawVisualizer();
+    }
+
+    function stopPlayback() {
+        if (sourceNode) {
+            try { sourceNode.stop(); } catch(e) {}
+            isPlaying = false;
+            $('play-btn').disabled = false;
+            $('stop-btn').disabled = true;
+            cancelAnimationFrame(animFrameId);
+        }
+    }
+
+    /* ====== A/B BYPASS ====== */
+    $('ab-btn').addEventListener('click', () => {
+        isBypassed = !isBypassed;
+        $('ab-label').textContent = isBypassed ? 'Bypass: ON' : 'Bypass: OFF';
+        $('ab-btn').classList.toggle('bg-amber-600', isBypassed);
+        $('ab-btn').classList.toggle('hover:bg-amber-500', isBypassed);
+        $('ab-btn').classList.toggle('bg-indigo-600', !isBypassed);
+        $('ab-btn').classList.toggle('hover:bg-indigo-500', !isBypassed);
+        if (isPlaying) { stopPlayback(); startPlayback(); }
+    });
+
+    /* ====== VISUALIZER ====== */
+    $('viz-freq').addEventListener('click', () => {
+        vizType = 'frequency';
+        $('viz-freq').className = 'text-xs px-3 py-1 rounded-lg bg-purple-600/30 text-purple-300 border border-purple-500/30';
+        $('viz-wave').className = 'text-xs px-3 py-1 rounded-lg bg-black/30 text-slate-400 border border-white/10';
+    });
+    $('viz-wave').addEventListener('click', () => {
+        vizType = 'waveform';
+        $('viz-wave').className = 'text-xs px-3 py-1 rounded-lg bg-purple-600/30 text-purple-300 border border-purple-500/30';
+        $('viz-freq').className = 'text-xs px-3 py-1 rounded-lg bg-black/30 text-slate-400 border border-white/10';
+    });
+
+    function drawVisualizer() {
+        const canvas = $('visualizer');
+        const ctx = canvas.getContext('2d');
+        const w = canvas.width, h = canvas.height;
+        const bufLen = analyserNode.frequencyBinCount;
+        const data = new Uint8Array(bufLen);
+
+        function draw() {
+            if (!isPlaying) return;
+            animFrameId = requestAnimationFrame(draw);
+
+            if (vizType === 'frequency') {
+                analyserNode.getByteFrequencyData(data);
+                ctx.clearRect(0, 0, w, h);
+                const barW = (w / bufLen) * 2.5;
+                let x = 0;
+                for (let i = 0; i < bufLen; i++) {
+                    const barH = (data[i] / 255) * h;
+                    const hue = 270 + (data[i] / 255) * 60;
+                    ctx.fillStyle = `hsla(${hue}, 80%, 60%, 0.9)`;
+                    ctx.fillRect(x, h - barH, barW - 1, barH);
+                    x += barW;
+                    if (x > w) break;
+                }
+            } else {
+                analyserNode.getByteTimeDomainData(data);
+                ctx.clearRect(0, 0, w, h);
+                ctx.lineWidth = 2;
+                ctx.strokeStyle = '#a855f7';
+                ctx.beginPath();
+                const sliceW = w / bufLen;
+                let x = 0;
+                for (let i = 0; i < bufLen; i++) {
+                    const v = data[i] / 128.0;
+                    const y = v * h / 2;
+                    i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+                    x += sliceW;
+                }
+                ctx.lineTo(w, h / 2);
+                ctx.stroke();
+            }
+
+            // Update level meters
+            analyserNode.getByteFrequencyData(data);
+            let sum = 0;
+            for (let i = 0; i < data.length; i++) sum += data[i];
+            const avg = sum / data.length;
+            const pct = Math.min(100, (avg / 255) * 150);
+            $('meter-out').style.width = pct + '%';
+            $('meter-in').style.width = (pct * 0.7) + '%';
+        }
+        draw();
+    }
+
+    /* ====== EXPORT WAV ====== */
+    $('export-btn').addEventListener('click', async () => {
+        if (!audioBuffer) return;
+        $('export-progress').classList.remove('hidden');
+        $('export-status').textContent = 'Rendering enhanced audio...';
+        $('export-bar').style.width = '10%';
+
+        // Create offline context
+        const sampleRate = audioBuffer.sampleRate;
+        const length = audioBuffer.length;
+        const channels = audioBuffer.numberOfChannels;
+        const offCtx = new OfflineAudioContext(channels, length, sampleRate);
+
+        // Create source
+        const offSource = offCtx.createBufferSource();
+        offSource.buffer = audioBuffer;
+
+        // Build processing chain (same as real-time) but into offline context
+        let node = offSource;
+
+        // Pitch
+        if (modules.pitch) {
+            const semi = parseInt($('pitch-shift').value);
+            offSource.playbackRate.value = Math.pow(2, semi / 12);
+        }
+
+        // Noise Reduction
+        if (modules.noise) {
+            const hpf = offCtx.createBiquadFilter();
+            hpf.type = 'highpass'; hpf.frequency.value = parseInt($('hpf-freq').value); hpf.Q.value = 0.7;
+            node.connect(hpf); node = hpf;
+            const lpf = offCtx.createBiquadFilter();
+            lpf.type = 'lowpass'; lpf.frequency.value = 16000; lpf.Q.value = 0.5;
+            node.connect(lpf); node = lpf;
+            const gate = offCtx.createDynamicsCompressor();
+            gate.threshold.value = parseInt($('gate-threshold').value); gate.knee.value = 2; gate.ratio.value = 20; gate.attack.value = 0.001; gate.release.value = 0.05;
+            node.connect(gate); node = gate;
+            const strength = parseInt($('nr-strength').value) / 100;
+            if (strength > 0.3) {
+                const n60 = offCtx.createBiquadFilter(); n60.type = 'notch'; n60.frequency.value = 60; n60.Q.value = 10 * strength;
+                node.connect(n60); node = n60;
+                const n120 = offCtx.createBiquadFilter(); n120.type = 'notch'; n120.frequency.value = 120; n120.Q.value = 10 * strength;
+                node.connect(n120); node = n120;
+            }
+        }
+        $('export-bar').style.width = '30%';
+
+        // Voice EQ
+        if (modules.voice) {
+            const w = offCtx.createBiquadFilter(); w.type='peaking'; w.frequency.value=300; w.Q.value=1; w.gain.value=parseFloat($('warmth').value);
+            node.connect(w); node = w;
+            const p = offCtx.createBiquadFilter(); p.type='peaking'; p.frequency.value=3000; p.Q.value=1.2; p.gain.value=parseFloat($('presence').value);
+            node.connect(p); node = p;
+            const a = offCtx.createBiquadFilter(); a.type='highshelf'; a.frequency.value=10000; a.gain.value=parseFloat($('air').value);
+            node.connect(a); node = a;
+        }
+
+        // De-esser
+        if (modules.pitch) {
+            const da = parseInt($('deess-amount').value);
+            if (da > 0) { const d = offCtx.createBiquadFilter(); d.type='peaking'; d.frequency.value=6500; d.Q.value=2; d.gain.value=-(da/10); node.connect(d); node = d; }
+        }
+
+        // Compressor
+        if (modules.dynamics) {
+            const c = offCtx.createDynamicsCompressor();
+            c.threshold.value=parseInt($('comp-threshold').value); c.knee.value=6; c.ratio.value=parseInt($('comp-ratio').value); c.attack.value=parseInt($('comp-attack').value)/1000; c.release.value=parseInt($('comp-release').value)/1000;
+            node.connect(c); node = c;
+            const mg = offCtx.createGain(); mg.gain.value = Math.pow(10, parseInt($('makeup-gain').value)/20);
+            node.connect(mg); node = mg;
+        }
+
+        // Tone
+        if (modules.tone) {
+            const b = offCtx.createBiquadFilter(); b.type='lowshelf'; b.frequency.value=150; b.gain.value=parseFloat($('bass-boost').value);
+            node.connect(b); node = b;
+            const t = offCtx.createBiquadFilter(); t.type='highshelf'; t.frequency.value=6000; t.gain.value=parseFloat($('treble-boost').value);
+            node.connect(t); node = t;
+        }
+
+        // Limiter
+        if (modules.limiter) {
+            const lim = offCtx.createDynamicsCompressor();
+            lim.threshold.value=parseInt($('limiter-ceiling').value); lim.knee.value=0; lim.ratio.value=20; lim.attack.value=0.001; lim.release.value=0.01;
+            node.connect(lim); node = lim;
+        }
+
+        node.connect(offCtx.destination);
+        offSource.start(0);
+        $('export-bar').style.width = '50%';
+        $('export-status').textContent = 'Processing audio pipeline...';
+
+        const rendered = await offCtx.startRendering();
+        $('export-bar').style.width = '80%';
+        $('export-status').textContent = 'Encoding WAV...';
+
+        // Normalize if checked
+        if ($('normalize-check').checked) {
+            let maxPeak = 0;
+            for (let c = 0; c < rendered.numberOfChannels; c++) {
+                const d = rendered.getChannelData(c);
+                for (let i = 0; i < d.length; i++) { const abs = Math.abs(d[i]); if (abs > maxPeak) maxPeak = abs; }
+            }
+            if (maxPeak > 0 && maxPeak < 1) {
+                const gain = 0.99 / maxPeak;
+                for (let c = 0; c < rendered.numberOfChannels; c++) {
+                    const d = rendered.getChannelData(c);
+                    for (let i = 0; i < d.length; i++) d[i] *= gain;
+                }
+            }
+        }
+
+        // Encode WAV
+        const wav = encodeWAV(rendered);
+        const blob = new Blob([wav], { type: 'audio/wav' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        const origName = $('file-name').textContent.replace(/\.[^/.]+$/, '');
+        a.download = origName + '_enhanced.wav';
+        a.click();
+        URL.revokeObjectURL(url);
+
+        $('export-bar').style.width = '100%';
+        $('export-status').textContent = 'Done! File downloaded.';
+        setTimeout(() => $('export-progress').classList.add('hidden'), 3000);
+    });
+
+    function encodeWAV(buffer) {
+        const numCh = buffer.numberOfChannels;
+        const sr = buffer.sampleRate;
+        const len = buffer.length;
+        const bytesPerSample = 2;
+        const blockAlign = numCh * bytesPerSample;
+        const byteRate = sr * blockAlign;
+        const dataSize = len * blockAlign;
+        const bufferSize = 44 + dataSize;
+        const ab = new ArrayBuffer(bufferSize);
+        const view = new DataView(ab);
+
+        function writeStr(offset, str) { for (let i = 0; i < str.length; i++) view.setUint8(offset + i, str.charCodeAt(i)); }
+
+        writeStr(0, 'RIFF'); view.setUint32(4, 36 + dataSize, true); writeStr(8, 'WAVE');
+        writeStr(12, 'fmt '); view.setUint32(16, 16, true); view.setUint16(20, 1, true);
+        view.setUint16(22, numCh, true); view.setUint32(24, sr, true);
+        view.setUint32(28, byteRate, true); view.setUint16(32, blockAlign, true);
+        view.setUint16(34, 16, true); writeStr(36, 'data'); view.setUint32(40, dataSize, true);
+
+        const channels = [];
+        for (let c = 0; c < numCh; c++) channels.push(buffer.getChannelData(c));
+
+        let offset = 44;
+        for (let i = 0; i < len; i++) {
+            for (let c = 0; c < numCh; c++) {
+                let sample = Math.max(-1, Math.min(1, channels[c][i]));
+                sample = sample < 0 ? sample * 0x8000 : sample * 0x7FFF;
+                view.setInt16(offset, sample, true);
+                offset += 2;
+            }
+        }
+        return ab;
+    }
+
+    </script>
+</body>
+</html>
