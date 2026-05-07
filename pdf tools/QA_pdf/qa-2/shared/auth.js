@@ -91,8 +91,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (typeof onShadowAuthChange === 'function') onShadowAuthChange(null);
             });
         } else {
+            // Find root path relative to this script's location
+            const scriptTag = document.querySelector('script[src*="shared/auth.js"]');
+            const scriptSrc = scriptTag ? scriptTag.getAttribute('src') : '';
+            const rootPath = scriptSrc.replace('shared/auth.js', '');
+            const loginUrl = (rootPath || './') + 'index.html#auth';
+
             container.innerHTML = `
-                <a href="/index.html#auth" class="shadow-auth-login-btn">
+                <a href="${loginUrl}" class="shadow-auth-login-btn">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
                     <span>Login</span>
                 </a>
