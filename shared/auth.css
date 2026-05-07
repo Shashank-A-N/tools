@@ -1,0 +1,245 @@
+/* ===== ShadowTools Auth UI Styles ===== */
+
+/* Profile widget */
+.shadow-auth-profile {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.shadow-auth-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 2px solid rgba(139, 92, 246, 0.5);
+    object-fit: cover;
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+.shadow-auth-avatar:hover {
+    border-color: #8b5cf6;
+    box-shadow: 0 0 12px rgba(139, 92, 246, 0.4);
+}
+
+.shadow-auth-name {
+    font-family: 'Inter', 'Rajdhani', sans-serif;
+    font-weight: 600;
+    font-size: 0.85rem;
+    color: #e2e8f0;
+    white-space: nowrap;
+}
+
+.shadow-auth-logout-btn {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    padding: 6px;
+    color: #94a3b8;
+    cursor: pointer;
+    transition: all 0.25s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.shadow-auth-logout-btn:hover {
+    background: rgba(239, 68, 68, 0.15);
+    border-color: rgba(239, 68, 68, 0.4);
+    color: #ef4444;
+}
+
+/* Login button */
+.shadow-auth-login-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.15), rgba(6, 182, 212, 0.1));
+    border: 1px solid rgba(139, 92, 246, 0.3);
+    border-radius: 10px;
+    color: #c4b5fd;
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+    font-size: 0.8rem;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+.shadow-auth-login-btn:hover {
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.3), rgba(6, 182, 212, 0.2));
+    border-color: rgba(139, 92, 246, 0.6);
+    color: #fff;
+    box-shadow: 0 0 20px rgba(139, 92, 246, 0.2);
+}
+
+/* ---- Auth Modal Styles (for main index.html) ---- */
+.auth-modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 10000;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.35s ease;
+}
+.auth-modal-overlay.active {
+    opacity: 1;
+    pointer-events: all;
+}
+
+.auth-modal {
+    background: rgba(15, 23, 42, 0.9);
+    border: 1px solid rgba(139, 92, 246, 0.2);
+    border-radius: 1.5rem;
+    padding: 2.5rem;
+    width: 90%;
+    max-width: 420px;
+    backdrop-filter: blur(24px);
+    box-shadow: 0 25px 80px rgba(0, 0, 0, 0.6), 0 0 60px rgba(139, 92, 246, 0.1);
+    transform: translateY(20px) scale(0.97);
+    transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+}
+.auth-modal-overlay.active .auth-modal {
+    transform: translateY(0) scale(1);
+}
+
+.auth-modal h2 {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: #fff;
+    text-align: center;
+    margin-bottom: 0.25rem;
+}
+
+.auth-modal .auth-subtitle {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.7rem;
+    color: #8b5cf6;
+    text-align: center;
+    letter-spacing: 0.15em;
+    margin-bottom: 1.5rem;
+}
+
+.auth-input-group {
+    margin-bottom: 1rem;
+}
+
+.auth-input-group label {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #94a3b8;
+    margin-bottom: 0.4rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+}
+
+.auth-input {
+    width: 100%;
+    padding: 0.7rem 1rem;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 0.75rem;
+    color: #e2e8f0;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.9rem;
+    outline: none;
+    transition: border-color 0.3s, box-shadow 0.3s;
+    box-sizing: border-box;
+}
+.auth-input:focus {
+    border-color: rgba(139, 92, 246, 0.6);
+    box-shadow: 0 0 15px rgba(139, 92, 246, 0.15);
+}
+.auth-input::placeholder {
+    color: #475569;
+}
+
+.auth-submit-btn {
+    width: 100%;
+    padding: 0.8rem;
+    background: linear-gradient(135deg, #8b5cf6, #6366f1);
+    border: none;
+    border-radius: 0.75rem;
+    color: #fff;
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 700;
+    font-size: 0.85rem;
+    letter-spacing: 0.15em;
+    cursor: pointer;
+    transition: all 0.3s;
+    margin-top: 0.5rem;
+}
+.auth-submit-btn:hover {
+    background: linear-gradient(135deg, #7c3aed, #4f46e5);
+    box-shadow: 0 0 30px rgba(139, 92, 246, 0.4);
+    transform: translateY(-1px);
+}
+
+.auth-toggle {
+    text-align: center;
+    margin-top: 1.2rem;
+    font-size: 0.8rem;
+    color: #64748b;
+}
+.auth-toggle a {
+    color: #8b5cf6;
+    text-decoration: none;
+    font-weight: 600;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+.auth-toggle a:hover {
+    color: #a78bfa;
+}
+
+.auth-error {
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    border-radius: 0.5rem;
+    color: #fca5a5;
+    font-size: 0.78rem;
+    padding: 0.5rem 0.75rem;
+    margin-bottom: 1rem;
+    display: none;
+}
+.auth-error.show {
+    display: block;
+}
+
+.auth-close-btn {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #94a3b8;
+    cursor: pointer;
+    transition: all 0.25s;
+}
+.auth-close-btn:hover {
+    background: rgba(239, 68, 68, 0.2);
+    color: #ef4444;
+    border-color: rgba(239, 68, 68, 0.3);
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+    .auth-modal {
+        padding: 1.5rem;
+        border-radius: 1rem;
+    }
+    .shadow-auth-name {
+        display: none;
+    }
+}
